@@ -1,0 +1,9 @@
+tgbot:
+  token: 'xxxxxxx'
+  username: 'xxxx_bot'
+  user_id: 123123123
+qqbot:
+  api_url: http://localhost:5700
+  token: xxxxx
+  webhook_port: 3300
+  webhook_host: localhost
