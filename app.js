@@ -45,7 +45,7 @@ const qqbot = new QQBot(Config.qqbot.webhook_host, Config.qqbot.webhook_port, Co
 
 qqbot.onMessage((msg) => {
     debug(msg);
-    if (msg.post_type === 'message' && msg.message_type === 'group' && msg.message.trim() !== '') {
+    if (msg.post_type === 'message' && msg.sub_type === 'group' && msg.message.trim() !== '') {
         qqbot.getUser(msg.user_id, msg.group_id).then((nickname) => {
             return tgbot.sendMessage(Config.tgbot.user_id, '[' + msg.group_id + '][' + nickname + '] ' + msg.message, {
                 disable_web_page_preview: true,
