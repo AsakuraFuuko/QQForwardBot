@@ -46,14 +46,10 @@ const qqbot = new QQBot(Config.qqbot.webhook_host, Config.qqbot.webhook_port, Co
 qqbot.onMessage((msg) => {
     debug(msg);
     if (msg.post_type === 'message' && msg.message_type === 'group' && msg.message.trim() !== '') {
-        qqbot.getUser(msg.user_id, msg.group_id).then((nickname) => {
-            return tgbot.sendMessage(Config.tgbot.user_id, '[' + msg.group_id + '][' + nickname + '] ' + msg.message, {
-                disable_web_page_preview: true,
-                parse_mode: 'HTML'
-            }).then(() => {
-                return nickname
-            })
-        }).then((nickname) => {
+        tgbot.sendMessage(Config.tgbot.user_id, '[' + msg.group_id + '][' + msg.sender.nickname + '] ' + msg.message, {
+            disable_web_page_preview: true,
+            parse_mode: 'HTML'
+        }).then(() => {
             if (msg.message.includes('CQ:image,file=')) {
                 let m;
                 while ((m = regex.exec(msg.message)) !== null) {
@@ -67,7 +63,7 @@ qqbot.onMessage((msg) => {
                     };
                     requestPromise.get(options).then((data) => {
                         tgbot.sendPhoto(Config.tgbot.user_id, data, {
-                            caption: nickname
+                            caption: msg.sender.nickname
                         })
                     })
                 }
