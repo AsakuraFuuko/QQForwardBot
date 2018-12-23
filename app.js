@@ -62,7 +62,7 @@ qqbot.onMessage((msg) => {
                     }
                     let url = m[2];
                     let options = {
-                        url: url,
+                        url: url.replace('https://', 'http://'),
                         encoding: null
                     };
                     requestPromise.get(options).then((data) => {
