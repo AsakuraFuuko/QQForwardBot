@@ -46,9 +46,9 @@ const qqbot = new QQBot(Config.qqbot.webhook_host, Config.qqbot.webhook_port, Co
 qqbot.onMessage((msg) => {
     debug(msg);
     if (msg.post_type === 'message' && msg.message_type === 'group' && msg.message.trim() !== '') {
-        tgbot.sendMessage(Config.tgbot.user_id, '[' + msg.group_id + '][' + msg.sender.nickname + '] ' + msg.message, {
+        tgbot.sendMessage(Config.tgbot.user_id, msg.sender.nickname + ' (' + msg.group_id + ')\n-------\n' + msg.message, {
             disable_web_page_preview: true,
-            parse_mode: 'HTML'
+            parse_mode: 'HTML',
         }).then(() => {
             if (msg.message.includes('CQ:image,file=')) {
                 let m;
@@ -70,6 +70,25 @@ qqbot.onMessage((msg) => {
             }
         })
     }
+});
+
+tgbot.on('callback_query', async (callbackQuery) => {
+    let action = callbackQuery.data;
+    let msg = callbackQuery.message;
+    let chat_type = msg.chat.type;
+    let title = chat_type.includes('group') ? msg.chat.title : null;
+    let opts = {
+        user_id: callbackQuery.from.id,
+        chat_id: msg.chat.id,
+        msg_id: msg.message_id,
+        callback_id: callbackQuery.id,
+        chat_type: chat_type,
+        title
+    };
+    if (msg.reply_to_message) {
+        opts.org_msg_id = msg.reply_to_message.message_id
+    }
+
 });
 
 function stickerAndPhotoHandle(msg) {
@@ -131,11 +150,11 @@ tgbot.on('message', (msg) => {
             let name = (msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name;
             let text = msg.text;
             let tmp = msg.reply_to_message.text;
-            let match = tmp.match(/\[(.+?)]/);
+            let match = tmp.match(/\((.+?)\)/);
             if (match) {
                 let group_id = match[1];
                 if (text !== '' && group_id) {
-                    qqbot.sendGroupMessage(group_id, '[' + name + '] ' + text)
+                    qqbot.sendGroupMessage(group_id, name + '\n--------\n' + text)
                 }
             }
         }
