@@ -95,7 +95,7 @@ function stickerAndPhotoHandle(msg) {
     let chat_id = msg.chat.id;
     let name = (msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name;
     let tmp = msg.reply_to_message.text;
-    let group_id = tmp.match(/\[(.+?)]/)[1];
+    let group_id = tmp.match(/\((.+?)\)/)[1];
     if (group_id) {
         let is_sticker = msg.sticker;
         let file = is_sticker ? msg.sticker : msg.photo.pop();
@@ -154,7 +154,7 @@ tgbot.on('message', (msg) => {
             if (match) {
                 let group_id = match[1];
                 if (text !== '' && group_id) {
-                    qqbot.sendGroupMessage(group_id, name + '\n--------\n' + text)
+                    qqbot.sendGroupMessage(group_id, text)
                 }
             }
         }
