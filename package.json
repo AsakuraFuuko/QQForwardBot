@@ -24,6 +24,7 @@
     "js-yaml": "^3.8.2",
     "log": "^1.4.0",
     "md5": "^2.2.1",
+    "music-api": "^0.3.11",
     "node-telegram-bot-api": "^0.27.1",
     "request": "^2.81.0",
     "request-promise": "^4.2.0"

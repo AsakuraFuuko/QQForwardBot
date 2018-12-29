@@ -7,6 +7,7 @@ const fs = require('fs');
 const DWebp = require('cwebp').DWebp;
 
 const QQBot = require('./lib/qqbot');
+const Music = require('./lib/music');
 const Config = require('./lib/config');
 
 const regex = /CQ:image,file=(.+?),url=(.+?)]/ig;
@@ -45,31 +46,47 @@ const qqbot = new QQBot(Config.qqbot.webhook_host, Config.qqbot.webhook_port, Co
 
 qqbot.onMessage((msg) => {
     debug(msg);
-    if (msg.post_type === 'message' && msg.message_type === 'group' && msg.message.trim() !== '') {
-        tgbot.sendMessage(Config.tgbot.user_id, msg.sender.nickname + ' (' + msg.group_id + ')\n-------\n' + msg.message, {
-            disable_web_page_preview: true,
-            parse_mode: 'HTML',
-        }).then(() => {
-            if (msg.message.includes('CQ:image,file=')) {
-                let m;
-                while ((m = regex.exec(msg.message)) !== null) {
-                    if (m.index === regex.lastIndex) {
-                        regex.lastIndex++;
-                    }
-                    let url = m[2];
-                    let options = {
-                        url: url.replace('https://', 'http://'),
-                        encoding: null
-                    };
-                    requestPromise.get(options).then((data) => {
-                        tgbot.sendPhoto(Config.tgbot.user_id, data, {
-                            caption: msg.sender.nickname
+    onText(/.*/, msg, (msg, match) => {
+        if (msg.post_type === 'message' && msg.message_type === 'group' && msg.message.trim() !== '') {
+            tgbot.sendMessage(Config.tgbot.user_id, msg.sender.nickname + ' (' + msg.group_id + ')\n-------\n' + msg.message, {
+                disable_web_page_preview: true,
+                parse_mode: 'HTML',
+            }).then(() => {
+                if (msg.message.includes('CQ:image,file=')) {
+                    let m;
+                    while ((m = regex.exec(msg.message)) !== null) {
+                        if (m.index === regex.lastIndex) {
+                            regex.lastIndex++;
+                        }
+                        let url = m[2];
+                        let options = {
+                            url: url.replace('https://', 'http://'),
+                            encoding: null
+                        };
+                        requestPromise.get(options).then((data) => {
+                            tgbot.sendPhoto(Config.tgbot.user_id, data, {
+                                caption: msg.sender.nickname
+                            })
                         })
-                    })
+                    }
                 }
+            })
+        }
+    });
+    onText(/(我要听)(?! )?(.*)/, msg, (msg, match) => {
+        if (!match[2]) {
+            qqbot.sendGroupMessage(msg.group_id, '你要听什么~');
+            return false
+        }
+        let keywords = match[2].trim();
+        Music.search(keywords).then((id) => {
+            if (id !== -1) {
+                qqbot.sendGroupMessage(msg.group_id, `[CQ:music,id=${id},type=qq]`)
+            } else {
+                qqbot.sendGroupMessage(msg.group_id, '没找到~');
             }
         })
-    }
+    })
 });
 
 tgbot.on('callback_query', async (callbackQuery) => {
@@ -139,6 +156,17 @@ function stickerAndPhotoHandle(msg) {
             return tgbot.sendMessage(chat_id, '发送失败~')
         })
     }
+}
+
+function onText(regex, message, callback) {
+    debug('Matching %s with %s', message.message, regex.regexp);
+    const result = regex.regexp.exec(message.message);
+    if (!result) {
+        return false;
+    }
+    regex.regexp.lastIndex = 0;
+    debug('Matches %s', regex.regexp);
+    callback(message, result);
 }
 
 tgbot.on('message', (msg) => {
