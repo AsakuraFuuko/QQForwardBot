@@ -10,7 +10,7 @@ const QQBot = require('./lib/qqbot');
 const Music = require('./lib/music');
 const Config = require('./lib/config');
 
-const regex = /CQ:image,file=(.+?),url=(.+?)]/ig;
+const regex = /\[CQ:image,file=(.+?),url=(.+?)]/ig;
 
 const tgbot = new TelegramBot(Config.tgbot.token, {polling: true});
 
@@ -48,7 +48,7 @@ qqbot.onMessage((msg) => {
     debug(msg);
     onText(/.*/, msg, (msg, match) => {
         if (msg.post_type === 'message' && msg.message_type === 'group' && msg.message.trim() !== '') {
-            tgbot.sendMessage(Config.tgbot.user_id, msg.sender.nickname + ' (' + msg.group_id + ')\n-------\n' + msg.message, {
+            tgbot.sendMessage(Config.tgbot.user_id, '<i>[' + msg.sender.nickname + '][' + msg.sender.card + '][' + msg.user_id + '](' + msg.group_id + ')</i>\n\n' + msg.message.replace(regex, '[图片]'), {
                 disable_web_page_preview: true,
                 parse_mode: 'HTML',
             }).then(() => {
@@ -65,7 +65,7 @@ qqbot.onMessage((msg) => {
                         };
                         requestPromise.get(options).then((data) => {
                             tgbot.sendPhoto(Config.tgbot.user_id, data, {
-                                caption: msg.sender.nickname
+                                caption: `[${msg.sender.nickname}][${msg.sender.card}]`
                             })
                         })
                     }
@@ -149,7 +149,7 @@ function stickerAndPhotoHandle(msg) {
             let obj = JSON.parse(body);
             debug(obj);
             if (obj.code === 'success') {
-                return qqbot.sendGroupMessage(group_id, '[' + name + '] ' + obj.data.url)
+                return qqbot.sendGroupMessage(group_id, obj.data.url)
             }
         }).catch((err) => {
             console.error(err);
@@ -159,13 +159,13 @@ function stickerAndPhotoHandle(msg) {
 }
 
 function onText(regex, message, callback) {
-    debug('Matching %s with %s', message.message, regex.regexp);
-    const result = regex.regexp.exec(message.message);
+    debug('Matching %s with %s', message.message, regex);
+    const result = regex.exec(message.message);
     if (!result) {
         return false;
     }
-    regex.regexp.lastIndex = 0;
-    debug('Matches %s', regex.regexp);
+    regex.lastIndex = 0;
+    debug('Matches %s', regex);
     callback(message, result);
 }
 
