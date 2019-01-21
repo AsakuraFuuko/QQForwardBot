@@ -119,38 +119,50 @@ function stickerAndPhotoHandle(msg) {
         let file_id = file.file_id;
         return tgbot.downloadFile(file_id, `./download/images`).then((path) => {
             debug(path);
-            let file = fs.createReadStream(path);
             if (is_sticker) {
+                let file = fs.createReadStream(path);
                 let decoder = new DWebp(file);
                 return decoder.toBuffer().then((body) => {
                     return {path: 'i.png', image: body}
                 })
             }
-            return {path: '1.jpg', image: file}
+            return {path: '1.jpg', image: fs.readFileSync(path)}
         }).then((obj) => {
-            return {
-                method: 'POST',
-                url: 'https://sm.ms/api/upload',
-                formData: {
-                    'smfile': {
-                        value: obj.image,
-                        options: {
-                            filename: obj.path
-                        }
-                    }
-                },
-                headers: {
-                    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
+            return qqbot.sendGroupMessage(group_id, {
+                "type": "image",
+                "data": {
+                    "file": 'base64://' + obj.image.toString('base64')
                 }
-            }
-        }).then((options) => {
-            return requestPromise(options)
-        }).then((body) => {
-            let obj = JSON.parse(body);
-            debug(obj);
-            if (obj.code === 'success') {
-                return qqbot.sendGroupMessage(group_id, obj.data.url)
-            }
+            })
+            //     return {
+            //         method: 'POST',
+            //         url: 'https://sm.ms/api/upload',
+            //         formData: {
+            //             'smfile': {
+            //                 value: obj.image,
+            //                 options: {
+            //                     filename: obj.path
+            //                 }
+            //             }
+            //         },
+            //         headers: {
+            //             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
+            //         }
+            //     }
+            // }).then((options) => {
+            //     return requestPromise(options)
+            // }).then((body) => {
+            //     let obj = JSON.parse(body);
+            //     debug(obj);
+            //     if (obj.code === 'success') {
+            //         return qqbot.sendGroupMessage(group_id, {
+            //             "type": "image",
+            //             "data": {
+            //                 "file": "123.jpg",
+            //                 "url": obj.data.url
+            //             }
+            //         })
+            //     }
         }).catch((err) => {
             console.error(err);
             return tgbot.sendMessage(chat_id, '发送失败~')
@@ -182,7 +194,12 @@ tgbot.on('message', (msg) => {
             if (match) {
                 let group_id = match[1];
                 if (text !== '' && group_id) {
-                    qqbot.sendGroupMessage(group_id, text)
+                    qqbot.sendGroupMessage(group_id, {
+                        "type": "text",
+                        "data": {
+                            "text": text
+                        }
+                    })
                 }
             }
         }
