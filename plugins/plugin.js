@@ -44,6 +44,26 @@ class Plugin {
                         val = `🌀${nickname}`;
                         msg = msg.replace(tag, val);
                         break;
+                    case 'rich':
+                        val = `<a href="${t.attrs.url}">${t.attrs.text}</a>`;
+                        msg = msg.replace(tag, val);
+                        break;
+                    case 'music':
+                        let url = '';
+                        switch (t.attrs.type) {
+                            case 'qq':
+                                url = `https://y.qq.com/n/yqq/song/${t.attrs.id}_num.html`;
+                                break;
+                            case '163':
+                                url = `http://music.163.com/song/${t.attrs.id}`;
+                                break;
+                            case 'xiami':
+                                url = `https://www.xiami.com/song/${t.attrs.id}`;
+                                break;
+                        }
+                        val = `${url}`;
+                        msg = msg.replace(tag, val);
+                        break;
                 }
             }
         }

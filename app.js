@@ -51,8 +51,10 @@ qqbot
     .on('socket.failed', (wsType, attempts) => console.log('[%s] 連線失敗 。･ﾟ･(つд`ﾟ)･ﾟ･ [丑%d] 對噗起', wsType, attempts))
     .on('api.response', (resObj) => console.log('伺服器響應: %O', resObj))
     .on('socket.close', (wsType, code, desc) => console.log('[%s] 連線關閉(%d: %s)', wsType, code, desc))
-    .on('ready', () => console.log('今天又是複讀複讀的一天 ｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡'));
-
+    .on('ready', () => console.log('今天又是複讀複讀的一天 ｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡'))
+    .on('message.private', (e, context) => {
+        tgbot.sendMessage(Config.qqbot.admin, context.message)
+    });
 // plugins
 
 new PluginMusic({tgbot, Config, qqbot});

@@ -75,12 +75,7 @@ class QQForward extends Plugin {
                         if (text !== '' && group_id) {
                             this.qqbot('send_group_msg', {
                                 group_id,
-                                message: {
-                                    "type": "text",
-                                    "data": {
-                                        "text": text
-                                    }
-                                }
+                                message: text
                             })
                         }
                     }
