@@ -53,7 +53,7 @@ qqbot
     .on('socket.close', (wsType, code, desc) => console.log('[%s] 連線關閉(%d: %s)', wsType, code, desc))
     .on('ready', () => console.log('今天又是複讀複讀的一天 ｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡'))
     .on('message.private', (e, context) => {
-        tgbot.sendMessage(Config.qqbot.admin, context.message)
+        tgbot.sendMessage(Config.tgbot.admin, context.message)
     });
 // plugins
 
