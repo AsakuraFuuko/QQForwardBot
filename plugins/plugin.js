@@ -64,6 +64,14 @@ class Plugin {
                         val = `${url}`;
                         msg = msg.replace(tag, val);
                         break;
+                    case 'dice':
+                        val = `🎲 ${t.attrs.type}`;
+                        msg = msg.replace(tag, val);
+                        break;
+                    case 'rps':
+                        val = `猜拳 ${t.attrs.type === 1 ? '✊🏻' : t.attrs.type === 2 ? '✌🏻' : '✋🏻'}`;
+                        msg = msg.replace(tag, val);
+                        break;
                 }
             }
         }
