@@ -98,7 +98,8 @@ class KanColleTime extends Plugin {
         console.log('开始报时循环');
         cron.schedule('0 * * * *', () => {
             let hour = (new Date()).getHours();
-            let groups = JSON.parse(fs.readFileSync(configpath, 'utf8')) || [];
+            let json = fs.readFileSync(configpath, 'utf8');
+            let groups = !!json ? JSON.parse(json) : [];
             for (let group of groups) {
                 let {group_id, shipname} = group;
                 this.sendTimeToGroup(hour, group_id, shipname)
@@ -107,7 +108,8 @@ class KanColleTime extends Plugin {
     }
 
     enable(group_id, shipname) {
-        let groups = JSON.parse(fs.readFileSync(configpath, 'utf8')) || [];
+        let json = fs.readFileSync(configpath, 'utf8');
+        let groups = !!json ? JSON.parse(json) : [];
         let group = groups.find(a => a.group_id === group_id);
         if (!!group) {
             debug('已存在，替换');
@@ -120,7 +122,8 @@ class KanColleTime extends Plugin {
     }
 
     disable(group_id) {
-        let groups = JSON.parse(fs.readFileSync(configpath, 'utf8')) || [];
+        let json = fs.readFileSync(configpath, 'utf8');
+        let groups = !!json ? JSON.parse(json) : [];
         let group = groups.find(a => a.group_id === group_id);
         if (!!group) {
             debug('移除');
