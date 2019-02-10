@@ -1,5 +1,5 @@
 'use strict';
-const debug = require('debug')('chinonyanbot');
+const debug = require('debug')('qqforward');
 const TelegramBot = require('node-telegram-bot-api');
 const {CQWebSocket} = require('cq-websocket');
 
@@ -7,6 +7,7 @@ const Config = require('./lib/config');
 
 const PluginQQForward = require('./plugins/qqforward');
 const PluginMusic = require('./plugins/music');
+const PluginKanColleTime = require('./plugins/kancolletime');
 const PluginOther = require('./plugins/other');
 
 const tgbot = new TelegramBot(Config.tgbot.token, {polling: true});
@@ -59,6 +60,7 @@ qqbot
 // plugins
 
 new PluginMusic({tgbot, Config, qqbot});
+new PluginKanColleTime({tgbot, Config, qqbot});
 new PluginOther({tgbot, Config, qqbot});
 new PluginQQForward({tgbot, Config, qqbot});
 

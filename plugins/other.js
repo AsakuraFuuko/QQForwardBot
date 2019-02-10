@@ -21,7 +21,7 @@ class Other extends Plugin {
                         data: {type: 1}
                     }
                 }), 1000);
-            })
+            });
 
             Plugin.onText(/猜拳|rps|CQ:rps/, context.message, (msg, match) => {
                 e.stopPropagation();
