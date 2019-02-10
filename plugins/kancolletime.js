@@ -1,6 +1,7 @@
 const debug = require('debug')('plugin_kancolletime');
 const cron = require('node-cron');
 const fs = require('fs');
+const touch = require("touch");
 const Plugin = require('./plugin');
 
 const KanColleTimeApi = require('../lib/kancolletime');
@@ -11,6 +12,7 @@ class KanColleTime extends Plugin {
     constructor(params) {
         super(params);
         this.loop();
+        touch(configpath);
     }
 
     init() {
