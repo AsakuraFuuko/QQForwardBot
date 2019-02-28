@@ -9,6 +9,7 @@ const PluginQQForward = require('./plugins/qqforward');
 const PluginMusic = require('./plugins/music');
 const PluginKanColleTime = require('./plugins/kancolletime');
 const PluginOther = require('./plugins/other');
+const PluginVM = require('./plugins/vm');
 
 const tgbot = new TelegramBot(Config.tgbot.token, {polling: true});
 
@@ -63,6 +64,7 @@ new PluginMusic({tgbot, Config, qqbot});
 new PluginKanColleTime({tgbot, Config, qqbot});
 new PluginOther({tgbot, Config, qqbot});
 new PluginQQForward({tgbot, Config, qqbot});
+new PluginVM({tgbot, Config, qqbot});
 
 qqbot.connect();
 
