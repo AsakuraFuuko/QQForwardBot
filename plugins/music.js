@@ -12,7 +12,7 @@ class Music extends Plugin {
             debug(context);
             debug(tags);
 
-            Plugin.onText(/(我要听)(?! )?(.*)/, context.message, (msg, match) => {
+            Plugin.onText(/(我要听)(?: )?(.*)/, context.message, (msg, match) => {
                 e.stopPropagation();
                 if (!match[2]) {
                     this.qqbot('send_msg', {group_id: context.group_id, user_id: context.user_id, message: '你要听什么~'});

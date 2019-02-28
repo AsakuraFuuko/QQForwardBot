@@ -20,7 +20,7 @@ class KanColleTime extends Plugin {
             debug(context);
             debug(tags);
 
-            Plugin.onText(/启用报时(?! )?(.*)/, context.message, (msg, match) => {
+            Plugin.onText(/启用报时(?: )?(.*)/, context.message, (msg, match) => {
                 e.stopPropagation();
                 if (!match[1]) {
                     this.qqbot('send_msg', {
