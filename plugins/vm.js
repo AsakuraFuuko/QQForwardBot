@@ -1,11 +1,11 @@
 const debug = require('debug')('plugin_vm');
-const {vm2} = require('vm2');
+const {VM} = require('vm2');
 const Plugin = require('./plugin');
 
-class VM extends Plugin {
+class VMPlugin extends Plugin {
     constructor(params) {
         super(params);
-        this.vm = new vm2();
+        this.vm = new VM();
     }
 
     init() {
@@ -29,4 +29,4 @@ class VM extends Plugin {
     }
 }
 
-module.exports = VM;
+module.exports = VMPlugin;
