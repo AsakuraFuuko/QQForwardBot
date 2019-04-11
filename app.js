@@ -16,6 +16,7 @@ let botname = '@' + Config.tgbot.username;
 
 tgbot.getMe().then((msg) => {
     botname = '@' + msg.username;
+    require('./lib/error')(tgbot, process.env.ERROR_CHANNEL);
 });
 
 // other start
@@ -47,7 +48,7 @@ const qqbot = new CQWebSocket({
 });
 qqbot
 // 連線例外處理
-    .on('socket.error', console.error)
+//     .on('socket.error', console.log)
     .on('socket.connecting', (wsType) => console.log('[%s] 建立連線中, 請稍後...', wsType))
     .on('socket.connect', (wsType, sock, attempts) => console.log('[%s] 連線成功 ヽ(✿ﾟ▽ﾟ)ノ 蛆蛆%d個嘗試', wsType, attempts))
     .on('socket.failed', (wsType, attempts) => console.log('[%s] 連線失敗 。･ﾟ･(つд`ﾟ)･ﾟ･ [丑%d] 對噗起', wsType, attempts))
