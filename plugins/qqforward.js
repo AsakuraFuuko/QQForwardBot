@@ -52,7 +52,7 @@ class QQForward extends Plugin {
                                 })
                             }
                         }).catch((e) => {
-                            debug(e);
+                            console.error(e);
                             this.tgbot.sendMessage(this.Config.tgbot.user_id, '发送失败~')
                         })
                     }
