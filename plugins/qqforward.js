@@ -64,7 +64,8 @@ class QQForward extends Plugin {
         this.tgbot.on('message', (msg) => {
             debug(msg);
             let user_id = msg.from.id;
-            if (msg.reply_to_message || !this.mutes.includes(user_id)) {
+            let is_command = msg.entities && msg.entities.filter((entry) => entry.offset === 0 && entry.type === 'bot_command').length > 0;
+            if (!is_command && (msg.reply_to_message || !this.mutes.includes(user_id))) {
                 if (msg.sticker || msg.photo) {
                     this.stickerAndPhotoHandle(msg);
                 } else {
@@ -72,6 +73,7 @@ class QQForward extends Plugin {
                     let text = msg.text;
                     let tmp = (msg.reply_to_message && (msg.reply_to_message.text || msg.reply_to_message.caption)) || '';
                     let match = tmp.match(/👥(\d+)/);
+                    if (!text) return;
                     if (match) {
                         let group_id = parseInt(match[1]);
                         if (text !== '' && group_id) {
@@ -105,7 +107,7 @@ class QQForward extends Plugin {
                             }, {
                                 type: 'text',
                                 data: {
-                                    text: '\n\n'
+                                    text: '\n'
                                 }
                             }, {
                                 type: 'text',
@@ -128,7 +130,7 @@ class QQForward extends Plugin {
             if (!this.mutes.includes(user_id)) {
                 this.mutes.push(user_id)
             }
-            return this.tgbot.sendMessage(chat_id, '已设置转发消息到QQ~')
+            return this.tgbot.sendMessage(chat_id, '已设置不转发消息到QQ~')
         });
 
         this.tgbot.onText(/\/unmute(@\w+)?/, (msg, match) => {
@@ -142,21 +144,23 @@ class QQForward extends Plugin {
                 this.mutes = this.mutes.filter((mute) => mute !== user_id);
             }
             console.log('unmute', msg.from);
-            return this.tgbot.sendMessage(chat_id, '已设置不转发消息到QQ~')
+            return this.tgbot.sendMessage(chat_id, '已设置转发消息到QQ~')
         })
     }
 
     stickerAndPhotoHandle(msg) {
         let chat_id = msg.chat.id;
         let name = (msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name;
-        let tmp = msg.reply_to_message.text || msg.reply_to_message.caption;
-        let group_id = tmp.match(/👥(\d+)/)[1];
+        let tmp = (msg.reply_to_message && (msg.reply_to_message.text || msg.reply_to_message.caption)) || '';
+        let group_id = (tmp.match(/👥(\d+)/) && tmp.match(/👥(\d+)/)[1]) || this.Config.qqbot.group;
         if (group_id) {
             let is_sticker = msg.sticker;
             let file = is_sticker ? msg.sticker : msg.photo.pop();
             let file_id = file.file_id;
+            let file_path = '';
             return this.tgbot.downloadFile(file_id, `./download/images`).then((path) => {
                 debug(path);
+                file_path = path;
                 if (is_sticker) {
                     let file = fs.createReadStream(path);
                     let decoder = new DWebp(file);
@@ -188,6 +192,12 @@ class QQForward extends Plugin {
             }).catch((err) => {
                 console.error(err);
                 return this.tgbot.sendMessage(chat_id, '发送失败~')
+            }).finally(() => {
+                if (!!file_path) {
+                    fs.unlink(file_path, (err) => {
+                        console.error(err)
+                    })
+                }
             })
         }
     }
