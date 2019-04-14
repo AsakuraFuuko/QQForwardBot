@@ -74,40 +74,22 @@ class QQForward extends Plugin {
                     let tmp = (msg.reply_to_message && (msg.reply_to_message.text || msg.reply_to_message.caption)) || '';
                     let match = tmp.match(/👥(\d+)/);
                     if (!text) return;
+                    let group_id = this.Config.qqbot.group;
                     if (match) {
-                        let group_id = parseInt(match[1]);
-                        if (text !== '' && group_id) {
-                            this.qqbot('send_group_msg', {
-                                group_id,
-                                message: [{
-                                    type: 'text',
-                                    data: {
-                                        text: '😶' + name
-                                    }
-                                }, {
-                                    type: 'text',
-                                    data: {
-                                        text: '\n\n'
-                                    }
-                                }, {
-                                    type: 'text',
-                                    data: {text}
-                                }]
-                            })
-                        }
-                    } else {
-                        let group_id = this.Config.qqbot.group;
+                        group_id = match[1];
+                    }
+                    if (text !== '' && group_id) {
                         this.qqbot('send_group_msg', {
                             group_id,
                             message: [{
                                 type: 'text',
                                 data: {
-                                    text: '😶' + name
+                                    text: /*'😶' +*/ name
                                 }
                             }, {
                                 type: 'text',
                                 data: {
-                                    text: '\n'
+                                    text: ': '
                                 }
                             }, {
                                 type: 'text',
@@ -153,6 +135,7 @@ class QQForward extends Plugin {
         let name = (msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name;
         let tmp = (msg.reply_to_message && (msg.reply_to_message.text || msg.reply_to_message.caption)) || '';
         let group_id = (tmp.match(/👥(\d+)/) && tmp.match(/👥(\d+)/)[1]) || this.Config.qqbot.group;
+        let caption = msg.caption || (msg.reply_to_message && msg.reply_to_message.caption) || '';
         if (group_id) {
             let is_sticker = msg.sticker;
             let file = is_sticker ? msg.sticker : msg.photo.pop();
@@ -175,17 +158,22 @@ class QQForward extends Plugin {
                     message: [{
                         type: 'text',
                         data: {
-                            text: '😶' + name
+                            text: /*'😶' +*/ name
                         }
                     }, {
                         type: 'text',
                         data: {
-                            text: '\n'
+                            text: ': '
                         }
                     }, {
                         type: 'image',
                         data: {
                             file: 'base64://' + obj.image.toString('base64')
+                        }
+                    }, {
+                        type: 'text',
+                        data: {
+                            text: caption
                         }
                     }]
                 })
@@ -195,7 +183,9 @@ class QQForward extends Plugin {
             }).finally(() => {
                 if (!!file_path) {
                     fs.unlink(file_path, (err) => {
-                        console.error(err)
+                        if (err) {
+                            console.error(err)
+                        }
                     })
                 }
             })
