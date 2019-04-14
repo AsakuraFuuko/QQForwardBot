@@ -7,6 +7,7 @@ class Plugin {
         this.tgbot = params.tgbot;
         this.Config = params.Config;
         this.qqbot = params.qqbot;
+        this.botname = params.botname;
         this.init();
     }
 

@@ -8,6 +8,7 @@ const fileType = require('file-type');
 class QQForward extends Plugin {
     constructor(params) {
         super(params);
+        this.mutes = [];
     }
 
     init() {
@@ -62,13 +63,14 @@ class QQForward extends Plugin {
 
         this.tgbot.on('message', (msg) => {
             debug(msg);
-            if (msg.reply_to_message) {
+            let user_id = msg.from.id;
+            if (msg.reply_to_message || !this.mutes.includes(user_id)) {
                 if (msg.sticker || msg.photo) {
                     this.stickerAndPhotoHandle(msg);
                 } else {
                     let name = (msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name;
                     let text = msg.text;
-                    let tmp = msg.reply_to_message.text || msg.reply_to_message.caption;
+                    let tmp = (msg.reply_to_message && (msg.reply_to_message.text || msg.reply_to_message.caption)) || '';
                     let match = tmp.match(/👥(\d+)/);
                     if (match) {
                         let group_id = parseInt(match[1]);
@@ -91,10 +93,57 @@ class QQForward extends Plugin {
                                 }]
                             })
                         }
+                    } else {
+                        let group_id = this.Config.qqbot.group;
+                        this.qqbot('send_group_msg', {
+                            group_id,
+                            message: [{
+                                type: 'text',
+                                data: {
+                                    text: '😶' + name
+                                }
+                            }, {
+                                type: 'text',
+                                data: {
+                                    text: '\n\n'
+                                }
+                            }, {
+                                type: 'text',
+                                data: {text}
+                            }]
+                        })
                     }
                 }
             }
         });
+
+        this.tgbot.onText(/\/mute(@\w+)?/, (msg, match) => {
+            let chat_id = msg.chat.id;
+            let user_id = msg.from.id;
+            let bot_name = match[1];
+            if (bot_name && bot_name !== this.botname) {
+                return;
+            }
+            console.log('mute', msg.from);
+            if (!this.mutes.includes(user_id)) {
+                this.mutes.push(user_id)
+            }
+            return this.tgbot.sendMessage(chat_id, '已设置转发消息到QQ~')
+        });
+
+        this.tgbot.onText(/\/unmute(@\w+)?/, (msg, match) => {
+            let chat_id = msg.chat.id;
+            let user_id = msg.from.id;
+            let bot_name = match[1];
+            if (bot_name && bot_name !== this.botname) {
+                return;
+            }
+            if (this.mutes.includes(user_id)) {
+                this.mutes = this.mutes.filter((mute) => mute !== user_id);
+            }
+            console.log('unmute', msg.from);
+            return this.tgbot.sendMessage(chat_id, '已设置不转发消息到QQ~')
+        })
     }
 
     stickerAndPhotoHandle(msg) {
