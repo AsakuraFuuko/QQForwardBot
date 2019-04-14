@@ -75,7 +75,20 @@ class QQForward extends Plugin {
                         if (text !== '' && group_id) {
                             this.qqbot('send_group_msg', {
                                 group_id,
-                                message: text
+                                message: [{
+                                    type: 'text',
+                                    data: {
+                                        text: '😶' + name
+                                    }
+                                }, {
+                                    type: 'text',
+                                    data: {
+                                        text: '\n\n'
+                                    }
+                                }, {
+                                    type: 'text',
+                                    data: {text}
+                                }]
                             })
                         }
                     }
@@ -106,12 +119,22 @@ class QQForward extends Plugin {
             }).then((obj) => {
                 return this.qqbot('send_group_msg', {
                     group_id,
-                    message: {
-                        "type": "image",
-                        "data": {
-                            "file": 'base64://' + obj.image.toString('base64')
+                    message: [{
+                        type: 'text',
+                        data: {
+                            text: '😶' + name
                         }
-                    }
+                    }, {
+                        type: 'text',
+                        data: {
+                            text: '\n'
+                        }
+                    }, {
+                        type: 'image',
+                        data: {
+                            file: 'base64://' + obj.image.toString('base64')
+                        }
+                    }]
                 })
             }).catch((err) => {
                 console.error(err);
