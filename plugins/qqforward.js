@@ -18,14 +18,14 @@ class QQForward extends Plugin {
             let title = '', msg = context.message;
 
             //title += '<i>';
-            title += `${context.sender.sex === 'male' ? '🚹' : '🚺'}` + (!!context.sender.card ? `${context.sender.card}` : `${context.sender.nickname}`);
-            title += `(${context.user_id})`;
-            title += `👥${context.group_id}`;
+            title += /*`${context.sender.sex === 'male' ? '🚹' : '🚺'}` + */(!!context.sender.card ? `${context.sender.card}` : `${context.sender.nickname}`);
+            // title += `(${context.user_id})`;
+            // title += `👥${context.group_id}`;
             //title += '</i>';
 
             msg = await this.parseMessage(context.message);
 
-            this.tgbot.sendMessage(this.Config.tgbot.user_id, title + '\n\n' + msg.msg, {
+            this.tgbot.sendMessage(this.Config.tgbot.user_id, title + ': ' + msg.msg, {
                 disable_web_page_preview: true,
                 parse_mode: 'HTML',
             }).then(() => {
