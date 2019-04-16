@@ -11,10 +11,6 @@ class Plugin {
         this.init();
     }
 
-    init() {
-
-    }
-
     static onText(regex, message, callback) {
         debug('Matching %s with %s', message, regex);
         const result = regex.exec(message);
@@ -24,6 +20,25 @@ class Plugin {
         regex.lastIndex = 0;
         debug('Matches %s', regex);
         callback(message, result);
+    }
+
+    static parseTag(tag) {
+        tag = tag.replace(/[\r\n]/g, '');
+        let groups = tag.match(CQTAG_ANALYSOR);
+        let type = '', attrs = {};
+        for (let match of groups[1].split(',')) {
+            if (!match.includes('=')) {
+                type = match
+            } else {
+                let key = match.split('=')[0];
+                attrs[key] = match.split('=').splice(1).join('')
+            }
+        }
+        return {type, attrs}
+    }
+
+    init() {
+
     }
 
     async parseMessage(msg) {
@@ -73,24 +88,14 @@ class Plugin {
                         val = `猜拳 ${t.attrs.type === 1 ? '✊🏻' : t.attrs.type === 2 ? '✌🏻' : '✋🏻'}`;
                         msg = msg.replace(tag, val);
                         break;
+                    case 'share':
+                        val = `<a href="${t.attrs.url}">${t.attrs.title}</a>`;
+                        msg = msg.replace(tag, val);
+                        break;
                 }
             }
         }
         return {msg, tags};
-    }
-
-    static parseTag(tag) {
-        let groups = tag.match(CQTAG_ANALYSOR);
-        let type = '', attrs = {};
-        for (let match of groups[1].split(',')) {
-            if (!match.includes('=')) {
-                type = match
-            } else {
-                let key = match.split('=')[0];
-                attrs[key] = match.split('=')[1]
-            }
-        }
-        return {type, attrs}
     }
 
 }
