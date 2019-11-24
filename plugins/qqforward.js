@@ -9,6 +9,7 @@ class QQForward extends Plugin {
     constructor(params) {
         super(params);
         this.mutes = [];
+        this.nicknames = [];
     }
 
     init() {
@@ -61,6 +62,10 @@ class QQForward extends Plugin {
             })
         });
 
+        this.qqbot.on('notice.group_upload', async (e, context) => {
+            debug(context);
+        });
+
         this.tgbot.on('message', (msg) => {
             debug(msg);
             let user_id = msg.from.id;
@@ -79,22 +84,27 @@ class QQForward extends Plugin {
                         group_id = match[1];
                     }
                     if (text !== '' && group_id) {
+                        let msg_nick = [{
+                            type: 'text',
+                            data: {
+                                text: /*'😶' +*/ name
+                            }
+                        }, {
+                            type: 'text',
+                            data: {
+                                text: ': '
+                            }
+                        }, {
+                            type: 'text',
+                            data: {text}
+                        }];
+                        let msg_no_nick = [{
+                            type: 'text',
+                            data: {text}
+                        }];
                         this.qqbot('send_group_msg', {
                             group_id,
-                            message: [{
-                                type: 'text',
-                                data: {
-                                    text: /*'😶' +*/ name
-                                }
-                            }, {
-                                type: 'text',
-                                data: {
-                                    text: ': '
-                                }
-                            }, {
-                                type: 'text',
-                                data: {text}
-                            }]
+                            message: this.nicknames.includes(user_id) ? msg_nick : msg_no_nick
                         })
                     }
                 }
@@ -127,6 +137,34 @@ class QQForward extends Plugin {
             }
             console.log('unmute', msg.from);
             return this.tgbot.sendMessage(chat_id, '已设置转发消息到QQ~')
+        });
+
+        this.tgbot.onText(/\/nickname_on(@\w+)?/, (msg, match) => {
+            let chat_id = msg.chat.id;
+            let user_id = msg.from.id;
+            let bot_name = match[1];
+            if (bot_name && bot_name !== this.botname) {
+                return;
+            }
+            if (this.nicknames.includes(user_id)) {
+                this.nicknames = this.nicknames.filter((nick) => nick !== user_id);
+            }
+            console.log('nickname on', msg.from);
+            return this.tgbot.sendMessage(chat_id, '已打开QQ昵称显示~')
+        })
+
+        this.tgbot.onText(/\/nickname_off(@\w+)?/, (msg, match) => {
+            let chat_id = msg.chat.id;
+            let user_id = msg.from.id;
+            let bot_name = match[1];
+            if (bot_name && bot_name !== this.botname) {
+                return;
+            }
+            if (this.nicknames.includes(user_id)) {
+                this.nicknames = this.nicknames.filter((nick) => nick !== user_id);
+            }
+            console.log('nickname off', msg.from);
+            return this.tgbot.sendMessage(chat_id, '已关闭QQ昵称显示~')
         })
     }
 
