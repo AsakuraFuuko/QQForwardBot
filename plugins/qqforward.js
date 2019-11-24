@@ -104,7 +104,7 @@ class QQForward extends Plugin {
                         }];
                         this.qqbot('send_group_msg', {
                             group_id,
-                            message: this.nicknames.includes(user_id) ? msg_nick : msg_no_nick
+                            message: this.nicknames.includes(user_id) ? msg_no_nick : msg_nick
                         })
                     }
                 }
@@ -151,7 +151,7 @@ class QQForward extends Plugin {
             }
             console.log('nickname on', msg.from);
             return this.tgbot.sendMessage(chat_id, '已打开QQ昵称显示~')
-        })
+        });
 
         this.tgbot.onText(/\/nickname_off(@\w+)?/, (msg, match) => {
             let chat_id = msg.chat.id;
@@ -160,8 +160,8 @@ class QQForward extends Plugin {
             if (bot_name && bot_name !== this.botname) {
                 return;
             }
-            if (this.nicknames.includes(user_id)) {
-                this.nicknames = this.nicknames.filter((nick) => nick !== user_id);
+            if (!this.nicknames.includes(user_id)) {
+                this.nicknames.push(user_id)
             }
             console.log('nickname off', msg.from);
             return this.tgbot.sendMessage(chat_id, '已关闭QQ昵称显示~')
