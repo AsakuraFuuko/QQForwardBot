@@ -61,7 +61,13 @@ class Plugin {
                         msg = msg.replace(tag, val);
                         break;
                     case 'rich':
-                        val = `<a href="${t.attrs.url}">${t.attrs.text}</a>`;
+                        if (!!t.attrs.url) {
+                            val = `<a href="${t.attrs.url}">${t.attrs.text}</a>`;
+                        } else {
+                            let content = t.attrs.content;
+                            content = JSON.parse(content.replace(/&#44;/g, ','));
+                            val = `<a href="${content.news.jumpUrl}">${content.news.title}</a>`;
+                        }
                         msg = msg.replace(tag, val);
                         break;
                     case 'music':
