@@ -19,9 +19,9 @@ class QQForward extends Plugin {
             let title = '', msg = context.message;
 
             //title += '<i>';
-            title += /*`${context.sender.sex === 'male' ? '🚹' : '🚺'}` + */(!!context.sender.card ? `${context.sender.card}` : `${context.sender.nickname}`);
+            title += `${context.sender.sex === 'male' ? '🚹' : '🚺'}` + (!!context.sender.card ? `${context.sender.card}` : `${context.sender.nickname}`);
             // title += `(${context.user_id})`;
-            // title += `👥${context.group_id}`;
+            title += `👥${context.group_id}`;
             //title += '</i>';
 
             msg = await this.parseMessage(context.message);
