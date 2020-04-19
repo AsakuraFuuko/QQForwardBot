@@ -47,17 +47,14 @@ const qqbot = new CQWebSocket({
     accessToken: Config.qqbot.token
 });
 qqbot
-// 連線例外處理
-//     .on('socket.error', console.log)
+    // 連線例外處理
+    //     .on('socket.error', console.log)
     .on('socket.connecting', (wsType) => console.log('[%s] 建立連線中, 請稍後...', wsType))
     .on('socket.connect', (wsType, sock, attempts) => console.log('[%s] 連線成功 ヽ(✿ﾟ▽ﾟ)ノ 蛆蛆%d個嘗試', wsType, attempts))
     .on('socket.failed', (wsType, attempts) => console.log('[%s] 連線失敗 。･ﾟ･(つд`ﾟ)･ﾟ･ [丑%d] 對噗起', wsType, attempts))
     .on('api.response', (resObj) => console.log('伺服器響應: %O', resObj))
     .on('socket.close', (wsType, code, desc) => console.log('[%s] 連線關閉(%d: %s)', wsType, code, desc))
-    .on('ready', () => console.log('今天又是複讀複讀的一天 ｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡'))
-    .on('message.private', (e, context) => {
-        tgbot.sendMessage(Config.tgbot.admin, context.message)
-    });
+    .on('ready', () => console.log('今天又是複讀複讀的一天 ｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡'));
 // plugins
 
 new PluginMusic({tgbot, Config, qqbot});

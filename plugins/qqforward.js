@@ -16,15 +16,13 @@ class QQForward extends Plugin {
         this.qqbot.on('message.group', async (e, context, tags) => {
             debug(context);
             debug(tags);
-            let title = '', msg = context.message;
+            let title = '', msg = await this.parseMessage(context.message);
 
             //title += '<i>';
             title += `${context.sender.sex === 'male' ? '🚹' : '🚺'}` + (!!context.sender.card ? `${context.sender.card}` : `${context.sender.nickname}`);
             // title += `(${context.user_id})`;
             title += `👥${context.group_id}`;
             //title += '</i>';
-
-            msg = await this.parseMessage(context.message);
 
             this.tgbot.sendMessage(this.Config.tgbot.user_id, title + ': ' + msg.msg, {
                 disable_web_page_preview: true,
@@ -66,6 +64,13 @@ class QQForward extends Plugin {
             debug(context);
         });
 
+        this.qqbot.on('message.private', async (e, context) => {
+            let title = `${context.sender.sex === 'male' ? '🚹' : '🚺'}` + (!!context.sender.card ? `${context.sender.card}` : `${context.sender.nickname}`);
+            let msg = await this.parseMessage(context.message);
+            title += `👤${context.user_id}`;
+            return this.tgbot.sendMessage(this.Config.tgbot.admin, title + ': ' + msg.msg)
+        });
+
         this.tgbot.on('message', (msg) => {
             debug(msg);
             let user_id = msg.from.id;
@@ -78,12 +83,17 @@ class QQForward extends Plugin {
                     let text = msg.text;
                     let tmp = (msg.reply_to_message && (msg.reply_to_message.text || msg.reply_to_message.caption)) || '';
                     let match = tmp.match(/👥(\d+)/);
+                    let match2 = tmp.match(/👤(\d+)/);
                     if (!text) return;
                     let group_id = this.Config.qqbot.group;
+                    let private_id = '';
                     if (match) {
                         group_id = match[1];
                     }
-                    if (text !== '' && group_id) {
+                    if (match2) {
+                        private_id = match2[1];
+                    }
+                    if (text !== '' && (private_id || group_id)) {
                         let msg_nick = [{
                             type: 'text',
                             data: {
@@ -102,10 +112,17 @@ class QQForward extends Plugin {
                             type: 'text',
                             data: {text}
                         }];
-                        this.qqbot('send_group_msg', {
-                            group_id,
-                            message: this.nicknames.includes(user_id) ? msg_no_nick : msg_nick
-                        })
+                        if (private_id) {
+                            this.qqbot('send_private_msg', {
+                                user_id: private_id,
+                                message: msg_no_nick
+                            })
+                        } else {
+                            this.qqbot('send_group_msg', {
+                                group_id,
+                                message: this.nicknames.includes(user_id) ? msg_no_nick : msg_nick
+                            })
+                        }
                     }
                 }
             }
