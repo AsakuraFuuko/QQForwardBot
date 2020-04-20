@@ -1,10 +1,8 @@
 tgbot:
   token: 'xxxxxxx'
   username: 'xxxx_bot'
-  user_id: 123123123
   admin: 123123123
 qqbot:
   ws_host: localhost
   ws_port: 6700
   token: xxxx
-  admin: 123123123

@@ -38,6 +38,21 @@ tgbot.onText(/\/debug(@\w+)?/, (msg, match) => {
     }
     return tgbot.sendMessage(chat_id, JSON.stringify(msg, null, 2))
 });
+
+tgbot.onText(/\/clean_data(@\w+)?/, (msg, match) => {
+    let chat_id = msg.chat.id;
+    let bot_name = match[1];
+    if (bot_name && bot_name !== botname) {
+        return;
+    }
+    qqbot('clean_data_dir', {
+        data_dir: 'image'
+    }).then((res) => {
+        console.log(res);
+        return tgbot.sendMessage(chat_id, JSON.stringify(res, null, 2))
+    });
+    // return tgbot.sendMessage(chat_id, JSON.stringify(msg, null, 2))
+});
 // other end
 
 // qqbot start
@@ -48,7 +63,7 @@ const qqbot = new CQWebSocket({
 });
 qqbot
     // 連線例外處理
-    //     .on('socket.error', console.log)
+    .on('socket.error', console.log)
     .on('socket.connecting', (wsType) => console.log('[%s] 建立連線中, 請稍後...', wsType))
     .on('socket.connect', (wsType, sock, attempts) => console.log('[%s] 連線成功 ヽ(✿ﾟ▽ﾟ)ノ 蛆蛆%d個嘗試', wsType, attempts))
     .on('socket.failed', (wsType, attempts) => console.log('[%s] 連線失敗 。･ﾟ･(つд`ﾟ)･ﾟ･ [丑%d] 對噗起', wsType, attempts))
