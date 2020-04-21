@@ -6,6 +6,7 @@ const DWebp = require('cwebp').DWebp;
 const fileType = require('file-type');
 const touch = require("touch");
 const gifify = require('gifify');
+const probe = require('node-ffprobe');
 
 const configpath = './data/qqgroups.json';
 
@@ -113,16 +114,19 @@ class QQForward extends Plugin {
 
                 if (msg.sticker || msg.photo || msg.document) {
                     let caption = msg.caption || (msg.reply_to_message && msg.reply_to_message.caption) || '';
-                    let is_sticker = !!msg.sticker;
+                    let is_sticker = !!msg.sticker, is_giforvideo = false;
                     let file;
                     if (msg.document) {
                         if (msg.document.mime_type.startsWith('image')) {
                             file = msg.document
+                        } else if (msg.document.mime_type.startsWith('video') && msg.document.file_size <= (10 * 1024 * 1024)) {
+                            file = msg.document;
+                            is_giforvideo = true
                         }
                     } else {
                         file = is_sticker ? msg.sticker : msg.photo.pop();
                     }
-                    return this.stickerAndPhotoHandle(name, chat_id, caption, file, is_sticker, is_private)
+                    return this.stickerAndPhotoHandle(name, chat_id, caption, file, is_sticker, is_private, is_giforvideo)
                 }
 
                 if (text !== '' && chat_id) {
@@ -231,7 +235,7 @@ class QQForward extends Plugin {
         })
     }
 
-    stickerAndPhotoHandle(name, chat_id, text, image_file, is_sticker, is_private) {
+    stickerAndPhotoHandle(name, chat_id, text, image_file, is_sticker, is_private, is_giforvideo) {
         if (chat_id) {
             let file_id = image_file.file_id;
             let file_path = '';
@@ -245,8 +249,32 @@ class QQForward extends Plugin {
                         return {path: 'i.png', image: body}
                     })
                 }
+                if (is_giforvideo) {
+                    // let file = fs.createReadStream(path);
+                    let file1 = fs.createWriteStream(path + '.gif');
+                    return probe(path).then((info) => {
+                        let opt = {}, stream = info.streams[0];
+                        if (stream) {
+                            if (stream.width > 512) {
+                                opt.resize = '512:-1'
+                            }
+                            if (512 * (stream.height / stream.width) > 512) {
+                                opt.resize = '-1:512'
+                            }
+                            opt.fps = eval(stream.avg_frame_rate);
+                            opt.colors = 256
+                        }
+                        let gif = gifify(path, opt).pipe(file1);
+                        return new Promise((resolve) => {
+                            gif.on('finish', () => {
+                                resolve({path: '1.gif', image: fs.readFileSync(path + '.gif')})
+                            })
+                        })
+                    })
+                }
                 return {path: '1.jpg', image: fs.readFileSync(path)}
             }).then((obj) => {
+                if (obj.image.length === 0) return;
                 let obj1 = {
                     message: [{
                         type: 'text',
@@ -282,6 +310,13 @@ class QQForward extends Plugin {
             }).finally(() => {
                 if (!!file_path) {
                     fs.unlink(file_path, (err) => {
+                        if (err) {
+                            console.error(err)
+                        }
+                    })
+                }
+                if (is_giforvideo) {
+                    fs.unlink(file_path + '.gif', (err) => {
                         if (err) {
                             console.error(err)
                         }
