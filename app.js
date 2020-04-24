@@ -1,7 +1,7 @@
 'use strict';
 // const debug = require('debug')('qqforward');
 const TelegramBot = require('node-telegram-bot-api');
-const {CQWebSocket} = require('cq-websocket');
+const Mirai = require('node-mirai-sdk');
 
 const Config = require('./lib/config');
 
@@ -56,30 +56,37 @@ tgbot.onText(/\/clean_data(@\w+)?/, (msg, match) => {
 // other end
 
 // qqbot start
-const qqbot = new CQWebSocket({
-    host: Config.qqbot.ws_host,
-    port: Config.qqbot.ws_port,
-    accessToken: Config.qqbot.token
+const qqbot = new Mirai({
+    host: 'ws://' + Config.qqbot.ws_host + ':' + Config.qqbot.ws_port,
+    authKey: Config.qqbot.token,
+    qq: Config.qqbot.account,
+    enableWebsocket: true
 });
-qqbot
-    // 連線例外處理
-    .on('socket.error', console.log)
-    .on('socket.connecting', (wsType) => console.log('[%s] 建立連線中, 請稍後...', wsType))
-    .on('socket.connect', (wsType, sock, attempts) => console.log('[%s] 連線成功 ヽ(✿ﾟ▽ﾟ)ノ 蛆蛆%d個嘗試', wsType, attempts))
-    .on('socket.failed', (wsType, attempts) => console.log('[%s] 連線失敗 。･ﾟ･(つд`ﾟ)･ﾟ･ [丑%d] 對噗起', wsType, attempts))
-    .on('api.response', (resObj) => console.log('伺服器響應: %O', resObj))
-    .on('socket.close', (wsType, code, desc) => console.log('[%s] 連線關閉(%d: %s)', wsType, code, desc))
-    .on('ready', () => console.log('今天又是複讀複讀的一天 ｡:.ﾟヽ(*´∀`)ﾉﾟ.:｡'));
-// plugins
 
-new PluginMusic({tgbot, Config, qqbot});
-new PluginKanColleTime({tgbot, Config, qqbot});
-new PluginOther({tgbot, Config, qqbot});
+qqbot.onSignal('authed', () => {
+    console.log(`Authed with session key ${qqbot.sessionKey}`);
+    qqbot.verify();
+});
+
+qqbot.onSignal('verified', async () => {
+    console.log(`Verified with session key ${qqbot.sessionKey}`);
+    const friendList = await qqbot.getFriendList();
+    const groupList = await qqbot.getGroupList();
+    console.log(`There are ${friendList.length} friends, ${groupList.length} groups in bot`);
+});
+
+// new PluginMusic({tgbot, Config, qqbot});
+// new PluginKanColleTime({tgbot, Config, qqbot});
+// new PluginOther({tgbot, Config, qqbot});
 new PluginQQForward({tgbot, Config, qqbot, botname});
 
-qqbot.connect();
+qqbot.listen('all');
 
 process.on('unhandledRejection', (reason) => {
     console.error(reason);
     //   process.exit(1);
+});
+
+process.on('exit', () => {
+    qqbot.release();
 });

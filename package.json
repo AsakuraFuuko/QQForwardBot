@@ -31,6 +31,7 @@
     "music-api": "^0.3.11",
     "node-cron": "^2.0.3",
     "node-ffprobe": "^3.0.0",
+    "node-mirai-sdk": "^0.1.24",
     "node-telegram-bot-api": "github:yagop/node-telegram-bot-api",
     "raven": "^2.6.4",
     "request": "^2.81.0",

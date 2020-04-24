@@ -7,6 +7,8 @@ const fileType = require('file-type');
 const touch = require("touch");
 const gifify = require('gifify');
 const probe = require('node-ffprobe');
+const Mirai = require('node-mirai-sdk');
+const {Plain, Image, FlashImage} = Mirai.MessageComponent;
 
 const configpath = './data/qqgroups.json';
 
@@ -17,72 +19,70 @@ class QQForward extends Plugin {
     }
 
     init() {
-        this.qqbot.on('message', async (e, context, tags) => {
-            debug(context);
-            debug(tags);
-            let title = '', msg = await this.parseMessage(context.message), msg_type = context.message_type;
-            // message_type group
-            //title += '<i>';
-            title += `${context.sender.sex === 'male' ? '🚹' : '🚺'}` + (!!context.sender.card ? `${context.sender.card}` : `${context.sender.nickname}`);
-            // title += `(${context.user_id})`;
-            // title += `👥${context.group_id}`;
-            //title += '</i>';
-            let chat_id;
+        this.qqbot.onMessage(async (message) => {
+            debug(message);
+            let title = '', msg = await this.parseMessage(message.messageChain), msg_type = message.type;
+            title += message.sender.memberName || message.sender.remark || message.sender.nickname;
+            let chat_id, retry = 0;
 
-            if (msg_type === 'group') {
-                let group_link_id = this.getGroupIDByLinkedID(context.group_id);
+            if (msg_type === 'GroupMessage') {
+                let group_link_id = this.getGroupIDByLinkedID(message.sender.group.id);
                 if (group_link_id) {
                     chat_id = group_link_id
                 } else {
                     chat_id = this.Config.tgbot.admin;
-                    title += `👥${context.group_id}`;
+                    title += `👥${message.sender.group.id}`;
                 }
             } else {
                 chat_id = this.Config.tgbot.admin;
-                if (msg_type === 'private') {
-                    title += `👤${context.user_id}`;
+                if (msg_type === 'FriendMessage') {
+                    title += `👤${message.sender.id}`;
                 }
             }
 
-            this.tgbot.sendMessage(chat_id, title + ': ' + msg.msg, {
+            this.tgbot.sendMessage(chat_id, title + ': ' + msg.text, {
                 disable_web_page_preview: true,
                 parse_mode: 'HTML',
-            }).then(() => {
+            }).then(async () => {
                 for (let tag of msg.tags) {
-                    if (tag.type === 'image' && tag.attrs.url != null) {
+                    if (tag.type === 'Image' && tag.url != null) {
                         let options = {
-                            url: tag.attrs.url.replace('https://', 'http://'),
+                            url: tag.url.replace('https://', 'http://'),
                             encoding: null
                         };
-                        requestPromise.get(options).then((data) => {
-                            let type = fileType(data);
-                            if (type.ext === 'gif') {
-                                this.tgbot.sendAnimation(chat_id, data, {
-                                    caption: title
-                                }, {
-                                    filename: 'a.gif',
-                                    contentType: type.mime
-                                })
-                            } else {
-                                this.tgbot.sendPhoto(chat_id, data, {
-                                    caption: title
-                                }, {
-                                    filename: tag.attrs.file,
-                                    contentType: type.mime
-                                })
-                            }
-                        }).catch((e) => {
-                            console.error(e);
-                            this.tgbot.sendMessage(chat_id, '发送失败~')
-                        })
+                        await sendPhoto(options);
                     }
                 }
-            })
-        });
+            });
 
-        this.qqbot.on('notice.group_upload', async (context) => {
-            debug(context);
-            return this.tgbot.sendMessage(this.Config.tgbot.admin, JSON.stringify(context, null, 2))
+            async function sendPhoto(options) {
+                return requestPromise.get(options).then((data) => {
+                    let type = fileType(data);
+                    if (type.ext === 'gif') {
+                        return this.tgbot.sendAnimation(chat_id, data, {
+                            caption: title
+                        }, {
+                            filename: 'a.gif',
+                            contentType: type.mime
+                        })
+                    } else {
+                        return this.tgbot.sendPhoto(chat_id, data, {
+                            caption: title
+                        }, {
+                            filename: 'a.png',
+                            contentType: type.mime
+                        })
+                    }
+                }).catch((e) => {
+                    if (retry > 5) {
+                        console.error(e);
+                        return this.tgbot.sendMessage(chat_id, '发送失败~')
+                    } else {
+                        retry += 1;
+                        return sendPhoto(options)
+                    }
+                })
+            }
         });
 
         this.tgbot.on('message', (msg) => {
@@ -130,34 +130,12 @@ class QQForward extends Plugin {
                 }
 
                 if (text !== '' && chat_id) {
-                    let msg_nick = [{
-                        type: 'text',
-                        data: {
-                            text: /*'😶' +*/ name
-                        }
-                    }, {
-                        type: 'text',
-                        data: {
-                            text: ': '
-                        }
-                    }, {
-                        type: 'text',
-                        data: {text}
-                    }];
-                    let msg_no_nick = [{
-                        type: 'text',
-                        data: {text}
-                    }];
+                    let msg_nick = [Plain(name), Plain(': '), Plain(text)];
+                    let msg_no_nick = [Plain(text)];
                     if (is_private) {
-                        this.qqbot('send_private_msg', {
-                            user_id: chat_id,
-                            message: msg_no_nick
-                        })
+                        this.qqbot.sendFriendMessage(msg_no_nick, chat_id)
                     } else {
-                        this.qqbot('send_group_msg', {
-                            group_id: chat_id,
-                            message: this.getUserShowNickName(tg_chat_id, user_id) ? msg_no_nick : msg_nick
-                        })
+                        this.qqbot.sendGroupMessage(this.getUserShowNickName(tg_chat_id, user_id) ? msg_no_nick : msg_nick, chat_id)
                     }
                 }
             }
@@ -245,9 +223,7 @@ class QQForward extends Plugin {
                 if (is_sticker) {
                     let file = fs.createReadStream(path);
                     let decoder = new DWebp(file);
-                    return decoder.toBuffer().then((body) => {
-                        return {path: 'i.png', image: body}
-                    })
+                    return decoder.write(path + '.png').then(() => path + '.png')
                 }
                 if (is_giforvideo) {
                     // let file = fs.createReadStream(path);
@@ -255,10 +231,10 @@ class QQForward extends Plugin {
                     return probe(path).then((info) => {
                         let opt = {}, stream = info.streams[0];
                         if (stream) {
-                            if (stream.width > 256) {
-                                opt.resize = '256:-1'
-                            } else if (256 * (stream.height / stream.width) > 256) {
-                                opt.resize = '-1:256'
+                            if (stream.width > 400) {
+                                opt.resize = '400:-1'
+                            } else if (400 * (stream.height / stream.width) > 400) {
+                                opt.resize = '-1:400'
                             }
                             opt.fps = eval(stream.avg_frame_rate);
                             opt.colors = 256
@@ -266,43 +242,24 @@ class QQForward extends Plugin {
                         let gif = gifify(path, opt).pipe(file1);
                         return new Promise((resolve) => {
                             gif.on('finish', () => {
-                                resolve({path: '1.gif', image: fs.readFileSync(path + '.gif')})
+                                resolve(path + '.gif')
                             })
                         })
                     })
                 }
-                return {path: '1.jpg', image: fs.readFileSync(path)}
+                return path
+            }).then((path) => {
+                if (!path) throw new Error('no image');
+                return this.qqbot.uploadImage(path, {type: is_private ? 'FriendMessage' : 'GroupMessage'});
             }).then((obj) => {
-                if (obj.image.length === 0) return;
-                let obj1 = {
-                    message: [{
-                        type: 'text',
-                        data: {
-                            text: /*'😶' +*/ name
-                        }
-                    }, {
-                        type: 'text',
-                        data: {
-                            text: ': '
-                        }
-                    }, {
-                        type: 'image',
-                        data: {
-                            file: 'base64://' + obj.image.toString('base64')
-                        }
-                    }, {
-                        type: 'text',
-                        data: {
-                            text: text
-                        }
-                    }]
-                };
+                debug(obj);
+                obj.imageId = obj.imageId.replace('.mirai', is_giforvideo ? '.gif' : '.png');
+                let obj1 = [Plain(name), Plain(': '), Image(obj), Plain(text)];
                 if (is_private) {
-                    obj1.user_id = chat_id
+                    return this.qqbot.sendFriendMessage(obj1, chat_id)
                 } else {
-                    obj1.group_id = chat_id
+                    return this.qqbot.sendGroupMessage(obj1, chat_id)
                 }
-                return this.qqbot(is_private ? 'send_private_msg' : 'send_group_msg', obj1)
             }).catch((err) => {
                 console.error(err);
                 return this.tgbot.sendMessage(chat_id, '发送失败~')
@@ -314,13 +271,20 @@ class QQForward extends Plugin {
                         }
                     })
                 }
-                // if (is_giforvideo) {
-                //     fs.unlink(file_path + '.gif', (err) => {
-                //         if (err) {
-                //             console.error(err)
-                //         }
-                //     })
-                // }
+                if (is_sticker) {
+                    fs.unlink(file_path + '.png', (err) => {
+                        if (err) {
+                            console.error(err)
+                        }
+                    })
+                }
+                if (is_giforvideo) {
+                    fs.unlink(file_path + '.gif', (err) => {
+                        if (err) {
+                            console.error(err)
+                        }
+                    })
+                }
             })
         }
     }
