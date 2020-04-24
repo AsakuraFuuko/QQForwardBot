@@ -113,7 +113,7 @@ class QQForward extends Plugin {
                 }
 
                 if (msg.sticker || msg.photo || msg.document) {
-                    let caption = msg.caption || (msg.reply_to_message && msg.reply_to_message.caption) || '';
+                    let caption = msg.caption || '';//(msg.reply_to_message && msg.reply_to_message.caption) || '';
                     let is_sticker = !!msg.sticker, is_giforvideo = false;
                     let file;
                     if (msg.document) {
@@ -255,11 +255,10 @@ class QQForward extends Plugin {
                     return probe(path).then((info) => {
                         let opt = {}, stream = info.streams[0];
                         if (stream) {
-                            if (stream.width > 512) {
-                                opt.resize = '512:-1'
-                            }
-                            if (512 * (stream.height / stream.width) > 512) {
-                                opt.resize = '-1:512'
+                            if (stream.width > 256) {
+                                opt.resize = '256:-1'
+                            } else if (256 * (stream.height / stream.width) > 256) {
+                                opt.resize = '-1:256'
                             }
                             opt.fps = eval(stream.avg_frame_rate);
                             opt.colors = 256
@@ -315,13 +314,13 @@ class QQForward extends Plugin {
                         }
                     })
                 }
-                if (is_giforvideo) {
-                    fs.unlink(file_path + '.gif', (err) => {
-                        if (err) {
-                            console.error(err)
-                        }
-                    })
-                }
+                // if (is_giforvideo) {
+                //     fs.unlink(file_path + '.gif', (err) => {
+                //         if (err) {
+                //             console.error(err)
+                //         }
+                //     })
+                // }
             })
         }
     }
