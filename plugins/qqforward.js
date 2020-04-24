@@ -21,6 +21,7 @@ class QQForward extends Plugin {
     init() {
         this.qqbot.onMessage(async (message) => {
             debug(message);
+            let that = this;
             let title = '', msg = await this.parseMessage(message.messageChain), msg_type = message.type;
             title += message.sender.memberName || message.sender.remark || message.sender.nickname;
             let chat_id, retry = 0;
@@ -59,14 +60,14 @@ class QQForward extends Plugin {
                 return requestPromise.get(options).then((data) => {
                     let type = fileType(data);
                     if (type.ext === 'gif') {
-                        return this.tgbot.sendAnimation(chat_id, data, {
+                        return that.tgbot.sendAnimation(chat_id, data, {
                             caption: title
                         }, {
                             filename: 'a.gif',
                             contentType: type.mime
                         })
                     } else {
-                        return this.tgbot.sendPhoto(chat_id, data, {
+                        return that.tgbot.sendPhoto(chat_id, data, {
                             caption: title
                         }, {
                             filename: 'a.png',
@@ -76,7 +77,7 @@ class QQForward extends Plugin {
                 }).catch((e) => {
                     if (retry > 5) {
                         console.error(e);
-                        return this.tgbot.sendMessage(chat_id, '发送失败~')
+                        return that.tgbot.sendMessage(chat_id, '发送失败~')
                     } else {
                         retry += 1;
                         return sendPhoto(options)

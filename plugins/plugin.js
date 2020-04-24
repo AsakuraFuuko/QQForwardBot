@@ -55,12 +55,25 @@ class Plugin {
                     case 'Plain':
                         msg += tag.text;
                         break;
-                    // case 'at':
-                    //     let nickname = await this.qqbot('get_stranger_info', {user_id: t.attrs.qq});
-                    //     nickname = nickname.data.nickname;
-                    //     val = `🌀${nickname}`;
-                    //     msg = msg.replace(tag, val);
-                    //     break;
+                    case 'At':
+                        msg += tag.display.replace('@', '🌀');
+                        break;
+                    case 'Quote':
+                        msg += 'Re: ';
+                        break;
+                    case 'Face':
+                        msg += '[' + tag.name + ']';
+                        break;
+                    case 'App':
+                        let content = tag.content;
+                        debug(content);
+                        content = JSON.parse(content);
+                        if (content.view !== 'music') {
+                            let detail_1 = content.meta.detail_1;
+                            val = `<a href="${detail_1.qqdocurl}">${detail_1.desc}</a>`;
+                            msg += val;
+                        }
+                        break;
                     // case 'rich':
                     //     if (!!t.attrs.url) {
                     //         val = `<a href="${t.attrs.url}">${t.attrs.text}</a>`;
