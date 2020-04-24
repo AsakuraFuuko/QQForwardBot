@@ -8,7 +8,7 @@ const touch = require("touch");
 const gifify = require('gifify');
 const probe = require('node-ffprobe');
 const Mirai = require('node-mirai-sdk');
-const {Plain, Image, FlashImage} = Mirai.MessageComponent;
+const {Plain, Image} = Mirai.MessageComponent;
 
 const configpath = './data/qqgroups.json';
 
@@ -25,6 +25,8 @@ class QQForward extends Plugin {
             let title = '', msg = await this.parseMessage(message.messageChain), msg_type = message.type;
             title += message.sender.memberName || message.sender.remark || message.sender.nickname;
             let chat_id, retry = 0;
+
+            if (!msg.text) return;
 
             if (msg_type === 'GroupMessage') {
                 let group_link_id = this.getGroupIDByLinkedID(message.sender.group.id);
