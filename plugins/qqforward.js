@@ -8,7 +8,7 @@ const touch = require("touch");
 const gifify = require('gifify');
 const probe = require('node-ffprobe');
 const Mirai = require('node-mirai-sdk');
-const {Plain, Image} = Mirai.MessageComponent;
+const {Plain, Image, Json, Xml, App} = Mirai.MessageComponent;
 
 const configpath = './data/qqgroups.json';
 
@@ -135,6 +135,15 @@ class QQForward extends Plugin {
                 if (text !== '' && chat_id) {
                     let msg_nick = [Plain(name), Plain(': '), Plain(text)];
                     let msg_no_nick = [Plain(text)];
+                    if (text.startsWith('!json!')) {
+                        msg_nick = msg_no_nick = [Json(text.replace('!json!', ''))]
+                    }
+                    if (text.startsWith('!xml!')) {
+                        msg_nick = msg_no_nick = [Xml(text.replace('!xml!', ''))]
+                    }
+                    if (text.startsWith('!app!')) {
+                        msg_nick = msg_no_nick = [App(text.replace('!app!', ''))]
+                    }
                     if (is_private) {
                         this.qqbot.sendFriendMessage(msg_no_nick, chat_id)
                     } else {
@@ -256,7 +265,7 @@ class QQForward extends Plugin {
                 return this.qqbot.uploadImage(path, {type: is_private ? 'FriendMessage' : 'GroupMessage'});
             }).then((obj) => {
                 debug(obj);
-                obj.imageId = obj.imageId.replace('.mirai', is_giforvideo ? '.gif' : '.png');
+                // obj.imageId = obj.imageId.replace('.mirai', is_giforvideo ? '.gif' : '.png');
                 let obj1 = [Plain(name), Plain(': '), Image(obj), Plain(text)];
                 if (is_private) {
                     return this.qqbot.sendFriendMessage(obj1, chat_id)
