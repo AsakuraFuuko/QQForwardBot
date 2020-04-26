@@ -1,5 +1,6 @@
 const debug = require('debug')('plugin_qqforward');
 const Plugin = require('./plugin');
+const Utils = require('../lib/utils');
 const requestPromise = require('request-promise');
 const fs = require('fs');
 const DWebp = require('cwebp').DWebp;
@@ -46,36 +47,72 @@ class QQForward extends Plugin {
             this.tgbot.sendMessage(chat_id, title + ': ' + msg.text, {
                 disable_web_page_preview: true,
                 parse_mode: 'HTML',
-            }).then(async () => {
+            }).then(async (msg1) => {
+                let photoss = [], photos = [], length = 0, gifs = [];
                 for (let tag of msg.tags) {
                     if (tag.type === 'Image' && tag.url != null) {
                         let options = {
                             url: tag.url.replace('https://', 'http://'),
                             encoding: null
                         };
-                        await sendPhoto(options);
+                        if (length > 10) {
+                            photoss.push(photos);
+                            photos = [];
+                        } else {
+                            let img = await sendPhoto(options);
+                            if (img.type === 'gif') {
+                                gifs.push(img)
+                            } else {
+                                photos.push(img);
+                                length += 1;
+                            }
+                        }
                     }
+                }
+                if (photos.length > 0) {
+                    photoss.push(photos);
+                }
+                for (let photos of photoss) {
+                    if (photos.length > 1) {
+                        //sendMediaGroup
+                        let imgs = photos.map((img => {
+                            return {
+                                type: 'photo',
+                                caption: title,
+                                media: img.data
+                            }
+                        }));
+                        await that.tgbot.sendMediaGroup(chat_id, imgs, {
+                            reply_to_message_id: msg1.message_id
+                        })
+                    } else {
+                        let photo = photos[0];
+                        if (photo.type !== 'gif') {
+                            await that.tgbot.sendPhoto(chat_id, photo.data, {
+                                caption: title,
+                                reply_to_message_id: msg1.message_id
+                            }, {
+                                filename: photo.filename,
+                                contentType: photo.mime
+                            })
+                        }
+                    }
+                }
+                for (let gif of gifs) {
+                    await that.tgbot.sendAnimation(chat_id, gif.data, {
+                        caption: title,
+                        reply_to_message_id: msg1.message_id
+                    }, {
+                        filename: gif.filename,
+                        contentType: gif.mime
+                    })
                 }
             });
 
             async function sendPhoto(options) {
                 return requestPromise.get(options).then((data) => {
                     let type = fileType(data);
-                    if (type.ext === 'gif') {
-                        return that.tgbot.sendAnimation(chat_id, data, {
-                            caption: title
-                        }, {
-                            filename: 'a.gif',
-                            contentType: type.mime
-                        })
-                    } else {
-                        return that.tgbot.sendPhoto(chat_id, data, {
-                            caption: title
-                        }, {
-                            filename: 'a.png',
-                            contentType: type.mime
-                        })
-                    }
+                    return {data, type: type.ext, filename: Utils.getRandomString + '.' + type.ext, mime: type.mime}
                 }).catch((e) => {
                     if (retry > 5) {
                         console.error(e);
@@ -266,7 +303,7 @@ class QQForward extends Plugin {
             }).then((obj) => {
                 debug(obj);
                 // obj.imageId = obj.imageId.replace('.mirai', is_giforvideo ? '.gif' : '.png');
-                let obj1 = [Plain(name), Plain(': '), Image(obj), Plain(text)];
+                let obj1 = [Image(obj), Plain('\n'), Plain(name), Plain('\n'), Plain(text)];
                 if (is_private) {
                     return this.qqbot.sendFriendMessage(obj1, chat_id)
                 } else {
