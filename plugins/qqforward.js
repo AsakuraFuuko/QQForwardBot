@@ -55,13 +55,16 @@ class QQForward extends Plugin {
                             url: tag.url.replace('https://', 'http://'),
                             encoding: null
                         };
+                        let img = await sendPhoto(options);
                         if (length > 10) {
                             photoss.push(photos);
                             photos = [];
+                            length = 0;
                         } else {
-                            let img = await sendPhoto(options);
                             if (img.type === 'gif') {
-                                gifs.push(img)
+                                photoss.push([img]);
+                                photos = [];
+                                length = 0;
                             } else {
                                 photos.push(img);
                                 length += 1;
@@ -82,37 +85,26 @@ class QQForward extends Plugin {
                                 media: img.data
                             }
                         }));
-                        await that.tgbot.sendMediaGroup(chat_id, imgs, {
+                        await this.tgbot.sendMediaGroup(chat_id, imgs, {
                             reply_to_message_id: msg1.message_id
                         })
                     } else {
                         let photo = photos[0];
-                        if (photo.type !== 'gif') {
-                            await that.tgbot.sendPhoto(chat_id, photo.data, {
-                                caption: title,
-                                reply_to_message_id: msg1.message_id
-                            }, {
-                                filename: photo.filename,
-                                contentType: photo.mime
-                            })
-                        }
+                        await this.tgbot[photo.type === 'gif' ? 'sendAnimation' : 'sendPhoto'](chat_id, photo.data, {
+                            caption: title,
+                            reply_to_message_id: msg1.message_id
+                        }, {
+                            filename: photo.filename,
+                            contentType: photo.mime
+                        })
                     }
-                }
-                for (let gif of gifs) {
-                    await that.tgbot.sendAnimation(chat_id, gif.data, {
-                        caption: title,
-                        reply_to_message_id: msg1.message_id
-                    }, {
-                        filename: gif.filename,
-                        contentType: gif.mime
-                    })
                 }
             });
 
             async function sendPhoto(options) {
                 return requestPromise.get(options).then((data) => {
                     let type = fileType(data);
-                    return {data, type: type.ext, filename: Utils.getRandomString + '.' + type.ext, mime: type.mime}
+                    return {data, type: type.ext, filename: Utils.getRandomString() + '.' + type.ext, mime: type.mime}
                 }).catch((e) => {
                     if (retry > 5) {
                         console.error(e);
