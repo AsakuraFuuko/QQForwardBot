@@ -5,18 +5,14 @@ const requestPromise = require('request-promise');
 const fs = require('fs');
 const DWebp = require('cwebp').DWebp;
 const fileType = require('file-type');
-const touch = require("touch");
 const gifify = require('gifify');
 const probe = require('node-ffprobe');
 const Mirai = require('node-mirai-sdk');
 const {Plain, Image, Json, Xml, App} = Mirai.MessageComponent;
 
-const configpath = './data/qqgroups.json';
-
 class QQForward extends Plugin {
     constructor(params) {
         super(params);
-        touch(configpath);
     }
 
     init() {
@@ -30,7 +26,7 @@ class QQForward extends Plugin {
             if (!msg.text) return;
 
             if (msg_type === 'GroupMessage') {
-                let group_link_id = this.getGroupIDByLinkedID(message.sender.group.id);
+                let group_link_id = this.getLinkedIDByGroupID(message.sender.group.id);
                 if (group_link_id) {
                     chat_id = group_link_id
                 } else {
@@ -128,10 +124,10 @@ class QQForward extends Plugin {
                 let name = (msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name;
                 let text = msg.text;
                 let tmp = (msg.reply_to_message && (msg.reply_to_message.text || msg.reply_to_message.caption)) || '';
-                let chat_id, group_link_id = this.getLinkedIDByGroupID(tg_chat_id),
+                let chat_id, group_id = this.getGroupIDByLinkedID(tg_chat_id),
                     is_private = false;
-                if (!!group_link_id) {
-                    chat_id = group_link_id
+                if (!!group_id) {
+                    chat_id = group_id
                 } else { //private chat
                     let match = tmp.match(/👥(\d+)/);
                     let match2 = tmp.match(/👤(\d+)/);
@@ -190,7 +186,11 @@ class QQForward extends Plugin {
                 return;
             }
             console.log('mute', msg.from);
-            this.setUserMute(chat_id, user_id, true);
+            let group_id = this.getGroupIDByLinkedID(chat_id);
+            if (!group_id) {
+                return this.tgbot.sendMessage(chat_id, '请先绑定一个QQ群')
+            }
+            this.setUserMute(group_id, user_id, true);
             return this.tgbot.sendMessage(chat_id, '已设置不转发消息到QQ~')
         });
 
@@ -202,7 +202,11 @@ class QQForward extends Plugin {
                 return;
             }
             console.log('unmute', msg.from);
-            this.setUserMute(chat_id, user_id, false);
+            let group_id = this.getGroupIDByLinkedID(chat_id);
+            if (!group_id) {
+                return this.tgbot.sendMessage(chat_id, '请先绑定一个QQ群')
+            }
+            this.setUserMute(group_id, user_id, false);
             return this.tgbot.sendMessage(chat_id, '已设置转发消息到QQ~')
         });
 
@@ -214,7 +218,11 @@ class QQForward extends Plugin {
                 return;
             }
             console.log('nickname on', msg.from);
-            this.setUserShowNickName(chat_id, user_id, true);
+            let group_id = this.getGroupIDByLinkedID(chat_id);
+            if (!group_id) {
+                return this.tgbot.sendMessage(chat_id, '请先绑定一个QQ群')
+            }
+            this.setUserShowNickName(group_id, user_id, true);
             return this.tgbot.sendMessage(chat_id, '已打开QQ昵称显示~')
         });
 
@@ -226,7 +234,11 @@ class QQForward extends Plugin {
                 return;
             }
             console.log('nickname off', msg.from);
-            this.setUserShowNickName(chat_id, user_id, false);
+            let group_id = this.getGroupIDByLinkedID(chat_id);
+            if (!group_id) {
+                return this.tgbot.sendMessage(chat_id, '请先绑定一个QQ群')
+            }
+            this.setUserShowNickName(group_id, user_id, false);
             return this.tgbot.sendMessage(chat_id, '已关闭QQ昵称显示~')
         });
 
@@ -238,7 +250,7 @@ class QQForward extends Plugin {
                 return;
             }
             console.log('linking ', chat_id, ' <===> ', group_id);
-            this.setGroupLinkedID(chat_id, group_id);
+            this.setGroupLinkedID(group_id, chat_id);
             return this.tgbot.sendMessage(chat_id, 'linked ' + chat_id + ' <===> ' + group_id)
         });
 
@@ -249,13 +261,17 @@ class QQForward extends Plugin {
                 return;
             }
             console.log('unlink ', chat_id);
-            this.setGroupLinkedID(chat_id, null);
+            let group_id = this.getGroupIDByLinkedID(chat_id);
+            if (!group_id) {
+                return this.tgbot.sendMessage(chat_id, '请先绑定一个QQ群')
+            }
+            this.setGroupLinkedID(group_id, null);
             return this.tgbot.sendMessage(chat_id, chat_id + ' unlinked')
         })
     }
 
     stickerAndPhotoHandle(name, chat_id, text, image_file, is_sticker, is_private, is_giforvideo) {
-        if (chat_id) {
+        if (chat_id && image_file) {
             let file_id = image_file.file_id;
             let file_path = '';
             return this.tgbot.downloadFile(file_id, `./download/images`).then((path) => {
@@ -330,25 +346,6 @@ class QQForward extends Plugin {
         }
     }
 
-    getLinkedIDByGroupID(group_id) {
-        return this.getGroupSetting(group_id, 'linked_id')
-    }
-
-    getGroupIDByLinkedID(linked_id) {
-        let json = fs.readFileSync(configpath, 'utf8');
-        let groups = !!json ? JSON.parse(json) : [];
-        let group = groups.find(a => a.linked_id === linked_id.toString());
-        if (!!group) {
-            return group.group_id
-        } else {
-            return null
-        }
-    }
-
-    setGroupLinkedID(group_id, linked_id) {
-        this.setGroupSetting(group_id, 'linked_id', linked_id)
-    }
-
     getUserShowNickName(group_id, user_id) {
         return this.getUserSettingByGroup(group_id, user_id, 'show_nickname')
     }
@@ -368,7 +365,7 @@ class QQForward extends Plugin {
     getUserSettingByGroup(group_id, user_id, key) {
         let users = this.getGroupSetting(group_id, 'users');
         if (!!users) {
-            let user = users.find(a => a.user_id === user_id);
+            let user = users.find(a => a.user_id.toString() === user_id.toString());
             return user ? user[key] : null;
         }
         return null;
@@ -376,7 +373,7 @@ class QQForward extends Plugin {
 
     setUserSettingByGroup(group_id, user_id, key, value) {
         let users = this.getGroupSetting(group_id, 'users') || [];
-        let user = users.find(a => a.group_id === group_id && a.user_id === user_id);
+        let user = users.find(a => a.group_id.toString() === group_id.toString() && a.user_id.toString() === user_id.toString());
         if (!!user) {
             debug('已存在，替换');
             let index = users.indexOf(user);
@@ -389,32 +386,6 @@ class QQForward extends Plugin {
         this.setGroupSetting(group_id, 'users', users)
     }
 
-    getGroupSetting(group_id, key) {
-        let json = fs.readFileSync(configpath, 'utf8');
-        let groups = !!json ? JSON.parse(json) : [];
-        let group = groups.find(a => a.group_id === group_id);
-        if (!!group) {
-            return group[key];
-        } else {
-            return null;
-        }
-    }
-
-    setGroupSetting(group_id, key, value) {
-        let json = fs.readFileSync(configpath, 'utf8');
-        let groups = !!json ? JSON.parse(json) : [];
-        let group = groups.find(a => a.group_id === group_id);
-        if (!!group) {
-            debug('已存在，替换');
-            let index = groups.indexOf(group);
-            groups[index][key] = value;
-        } else {
-            let obj = {group_id};
-            obj[key] = value;
-            groups.push(obj)
-        }
-        fs.writeFileSync(configpath, JSON.stringify(groups))
-    }
 }
 
 module.exports = QQForward;

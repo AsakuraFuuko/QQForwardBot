@@ -1,0 +1,698 @@
+[
+  {
+    "id": 100101,
+    "jp_name": "ヒヨリ",
+    "cn_name": "日和莉",
+    "max_star": 6
+  },
+  {
+    "id": 100201,
+    "jp_name": "ユイ",
+    "cn_name": "优衣",
+    "max_star": 6
+  },
+  {
+    "id": 100301,
+    "jp_name": "レイ",
+    "cn_name": "怜",
+    "max_star": 6
+  },
+  {
+    "id": 100401,
+    "jp_name": "ミソギ",
+    "cn_name": "未奏希",
+    "max_star": 5
+  },
+  {
+    "id": 100501,
+    "jp_name": "マツリ",
+    "cn_name": "茉莉",
+    "max_star": 5
+  },
+  {
+    "id": 100601,
+    "jp_name": "アカリ",
+    "cn_name": "茜里",
+    "max_star": 5
+  },
+  {
+    "id": 100701,
+    "jp_name": "ミヤコ",
+    "cn_name": "宫子",
+    "max_star": 5
+  },
+  {
+    "id": 100801,
+    "jp_name": "ユキ",
+    "cn_name": "小雪",
+    "max_star": 5
+  },
+  {
+    "id": 100901,
+    "jp_name": "アンナ",
+    "cn_name": "杏奈",
+    "max_star": 5
+  },
+  {
+    "id": 101001,
+    "jp_name": "マホ",
+    "cn_name": "真步",
+    "max_star": 6
+  },
+  {
+    "id": 101101,
+    "jp_name": "リノ",
+    "cn_name": "璃乃",
+    "max_star": 6
+  },
+  {
+    "id": 101201,
+    "jp_name": "ハツネ",
+    "cn_name": "初音",
+    "max_star": 6
+  },
+  {
+    "id": 101301,
+    "jp_name": "ナナカ",
+    "cn_name": "七香",
+    "max_star": 5
+  },
+  {
+    "id": 101401,
+    "jp_name": "カスミ",
+    "cn_name": "霞",
+    "max_star": 5
+  },
+  {
+    "id": 101501,
+    "jp_name": "ミサト",
+    "cn_name": "美里",
+    "max_star": 5
+  },
+  {
+    "id": 101601,
+    "jp_name": "スズナ",
+    "cn_name": "铃奈",
+    "max_star": 5
+  },
+  {
+    "id": 101701,
+    "jp_name": "カオリ",
+    "cn_name": "香织",
+    "max_star": 5
+  },
+  {
+    "id": 101801,
+    "jp_name": "イオ",
+    "cn_name": "伊绪",
+    "max_star": 6
+  },
+  {
+    "id": 102001,
+    "jp_name": "ミミ",
+    "cn_name": "美美",
+    "max_star": 5
+  },
+  {
+    "id": 102101,
+    "jp_name": "クルミ",
+    "cn_name": "胡桃",
+    "max_star": 5
+  },
+  {
+    "id": 102201,
+    "jp_name": "ヨリ",
+    "cn_name": "日和莉依里",
+    "max_star": 5
+  },
+  {
+    "id": 102301,
+    "jp_name": "アヤネ",
+    "cn_name": "绫音",
+    "max_star": 5
+  },
+  {
+    "id": 102501,
+    "jp_name": "スズメ",
+    "cn_name": "铃莓",
+    "max_star": 5
+  },
+  {
+    "id": 102601,
+    "jp_name": "リン",
+    "cn_name": "铃花凛",
+    "max_star": 5
+  },
+  {
+    "id": 102701,
+    "jp_name": "エリコ",
+    "cn_name": "惠理子",
+    "max_star": 5
+  },
+  {
+    "id": 102801,
+    "jp_name": "サレン",
+    "cn_name": "咲恋",
+    "max_star": 5
+  },
+  {
+    "id": 102901,
+    "jp_name": "ノゾミ",
+    "cn_name": "望",
+    "max_star": 5
+  },
+  {
+    "id": 103001,
+    "jp_name": "ニノン",
+    "cn_name": "妮隆·朱贝尔",
+    "max_star": 5
+  },
+  {
+    "id": 103101,
+    "jp_name": "シノブ",
+    "cn_name": "忍",
+    "max_star": 5
+  },
+  {
+    "id": 103201,
+    "jp_name": "アキノ",
+    "cn_name": "秋乃",
+    "max_star": 5
+  },
+  {
+    "id": 103301,
+    "jp_name": "マヒル",
+    "cn_name": "真阳",
+    "max_star": 5
+  },
+  {
+    "id": 103401,
+    "jp_name": "ユカリ",
+    "cn_name": "由加莉",
+    "max_star": 6
+  },
+  {
+    "id": 103601,
+    "jp_name": "キョウカ",
+    "cn_name": "镜华",
+    "max_star": 5
+  },
+  {
+    "id": 103701,
+    "jp_name": "トモ",
+    "cn_name": "智",
+    "max_star": 5
+  },
+  {
+    "id": 103801,
+    "jp_name": "シオリ",
+    "cn_name": "栞",
+    "max_star": 5
+  },
+  {
+    "id": 104001,
+    "jp_name": "アオイ",
+    "cn_name": "碧",
+    "max_star": 5
+  },
+  {
+    "id": 104201,
+    "jp_name": "チカ",
+    "cn_name": "千歌",
+    "max_star": 5
+  },
+  {
+    "id": 104301,
+    "jp_name": "マコト",
+    "cn_name": "真琴",
+    "max_star": 5
+  },
+  {
+    "id": 104401,
+    "jp_name": "イリヤ",
+    "cn_name": "伊莉雅·奥恩斯坦",
+    "max_star": 5
+  },
+  {
+    "id": 104501,
+    "jp_name": "クウカ",
+    "cn_name": "空花",
+    "max_star": 5
+  },
+  {
+    "id": 104601,
+    "jp_name": "タマキ",
+    "cn_name": "珠希",
+    "max_star": 5
+  },
+  {
+    "id": 104701,
+    "jp_name": "ジュン",
+    "cn_name": "纯",
+    "max_star": 5
+  },
+  {
+    "id": 104801,
+    "jp_name": "ミフユ",
+    "cn_name": "美冬",
+    "max_star": 5
+  },
+  {
+    "id": 104901,
+    "jp_name": "シズル",
+    "cn_name": "静流",
+    "max_star": 5
+  },
+  {
+    "id": 105001,
+    "jp_name": "ミサキ",
+    "cn_name": "美咲",
+    "max_star": 5
+  },
+  {
+    "id": 105101,
+    "jp_name": "ミツキ",
+    "cn_name": "深月",
+    "max_star": 5
+  },
+  {
+    "id": 105201,
+    "jp_name": "リマ",
+    "cn_name": "莉玛",
+    "max_star": 6
+  },
+  {
+    "id": 105301,
+    "jp_name": "モニカ",
+    "cn_name": "莫妮卡·韦斯文特",
+    "max_star": 5
+  },
+  {
+    "id": 105401,
+    "jp_name": "ツムギ",
+    "cn_name": "纺希",
+    "max_star": 5
+  },
+  {
+    "id": 105501,
+    "jp_name": "アユミ",
+    "cn_name": "步未",
+    "max_star": 5
+  },
+  {
+    "id": 105601,
+    "jp_name": "ルカ",
+    "cn_name": "流夏",
+    "max_star": 5
+  },
+  {
+    "id": 105701,
+    "jp_name": "ジータ",
+    "cn_name": "姬塔",
+    "max_star": 5
+  },
+  {
+    "id": 105801,
+    "jp_name": "ペコリーヌ",
+    "cn_name": "佩可莉姆",
+    "max_star": 6
+  },
+  {
+    "id": 105901,
+    "jp_name": "コッコロ",
+    "cn_name": "可可萝",
+    "max_star": 6
+  },
+  {
+    "id": 106001,
+    "jp_name": "キャル",
+    "cn_name": "凯露",
+    "max_star": 6
+  },
+  {
+    "id": 106101,
+    "jp_name": "ムイミ",
+    "cn_name": "矛依未",
+    "max_star": 5
+  },
+  {
+    "id": 106301,
+    "jp_name": "アリサ",
+    "cn_name": "亚里莎",
+    "max_star": 5
+  },
+  {
+    "id": 106501,
+    "jp_name": "カヤ",
+    "cn_name": "嘉夜",
+    "max_star": 5
+  },
+  {
+    "id": 106601,
+    "jp_name": "イノリ",
+    "cn_name": "祈梨",
+    "max_star": 5
+  },
+  {
+    "id": 106701,
+    "jp_name": "ホマレ",
+    "cn_name": "穗希",
+    "max_star": 5
+  },
+  {
+    "id": 106801,
+    "jp_name": "ラビリスタ",
+    "cn_name": "拉比莉斯塔",
+    "max_star": 5
+  },
+  {
+    "id": 107001,
+    "jp_name": "ネネカ",
+    "cn_name": "似似花",
+    "max_star": 5
+  },
+  {
+    "id": 107101,
+    "jp_name": "クリスティーナ",
+    "cn_name": "克里斯蒂娜·摩根",
+    "max_star": 5
+  },
+  {
+    "id": 107501,
+    "jp_name": "ペコリーヌ（サマー）",
+    "cn_name": "佩可莉姆（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 107601,
+    "jp_name": "コッコロ（サマー）",
+    "cn_name": "可可萝（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 107701,
+    "jp_name": "スズメ（サマー）",
+    "cn_name": "铃莓（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 107801,
+    "jp_name": "キャル（サマー）",
+    "cn_name": "凯露（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 107901,
+    "jp_name": "タマキ（サマー）",
+    "cn_name": "珠希（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 108001,
+    "jp_name": "ミフユ（サマー）",
+    "cn_name": "美冬（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 108101,
+    "jp_name": "シノブ（ハロウィン）",
+    "cn_name": "忍（万圣节）",
+    "max_star": 5
+  },
+  {
+    "id": 108201,
+    "jp_name": "ミヤコ（ハロウィン）",
+    "cn_name": "宫子（万圣节）",
+    "max_star": 5
+  },
+  {
+    "id": 108301,
+    "jp_name": "ミサキ（ハロウィン）",
+    "cn_name": "美咲（万圣节）",
+    "max_star": 5
+  },
+  {
+    "id": 108401,
+    "jp_name": "チカ（クリスマス）",
+    "cn_name": "千歌（圣诞节）",
+    "max_star": 5
+  },
+  {
+    "id": 108501,
+    "jp_name": "クルミ（クリスマス）",
+    "cn_name": "胡桃（圣诞节）",
+    "max_star": 5
+  },
+  {
+    "id": 108601,
+    "jp_name": "アヤネ（クリスマス）",
+    "cn_name": "绫音（圣诞节）",
+    "max_star": 5
+  },
+  {
+    "id": 108701,
+    "jp_name": "ヒヨリ（ニューイヤー）",
+    "cn_name": "日和莉（新年）",
+    "max_star": 5
+  },
+  {
+    "id": 108801,
+    "jp_name": "ユイ（ニューイヤー）",
+    "cn_name": "优衣（新年）",
+    "max_star": 5
+  },
+  {
+    "id": 108901,
+    "jp_name": "レイ（ニューイヤー）",
+    "cn_name": "怜（新年）",
+    "max_star": 5
+  },
+  {
+    "id": 109001,
+    "jp_name": "エリコ（バレンタイン）",
+    "cn_name": "惠理子（情人节）",
+    "max_star": 5
+  },
+  {
+    "id": 109101,
+    "jp_name": "シズル（バレンタイン）",
+    "cn_name": "静流（情人节）",
+    "max_star": 5
+  },
+  {
+    "id": 109201,
+    "jp_name": "アン",
+    "cn_name": "杏奈安",
+    "max_star": 5
+  },
+  {
+    "id": 109301,
+    "jp_name": "ルゥ",
+    "cn_name": "露",
+    "max_star": 5
+  },
+  {
+    "id": 109401,
+    "jp_name": "グレア",
+    "cn_name": "古蕾雅",
+    "max_star": 5
+  },
+  {
+    "id": 109501,
+    "jp_name": "クウカ（オーエド）",
+    "cn_name": "空花（大江户）",
+    "max_star": 5
+  },
+  {
+    "id": 109601,
+    "jp_name": "ニノン（オーエド）",
+    "cn_name": "妮隆·朱贝尔（大江户）",
+    "max_star": 5
+  },
+  {
+    "id": 109701,
+    "jp_name": "レム",
+    "cn_name": "雷姆",
+    "max_star": 5
+  },
+  {
+    "id": 109801,
+    "jp_name": "ラム",
+    "cn_name": "拉姆",
+    "max_star": 5
+  },
+  {
+    "id": 109901,
+    "jp_name": "エミリア",
+    "cn_name": "爱蜜莉雅",
+    "max_star": 5
+  },
+  {
+    "id": 110001,
+    "jp_name": "スズナ（サマー）",
+    "cn_name": "铃奈（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 110101,
+    "jp_name": "イオ（サマー）",
+    "cn_name": "伊绪（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 110201,
+    "jp_name": "ミサキ（サマー）",
+    "cn_name": "美咲（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 110301,
+    "jp_name": "サレン（サマー）",
+    "cn_name": "咲恋（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 110401,
+    "jp_name": "マコト（サマー）",
+    "cn_name": "真琴（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 110501,
+    "jp_name": "カオリ（サマー）",
+    "cn_name": "香织（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 110601,
+    "jp_name": "マホ（サマー）",
+    "cn_name": "真步（泳装）",
+    "max_star": 5
+  },
+  {
+    "id": 110701,
+    "jp_name": "アオイ（編入生）",
+    "cn_name": "碧（插班生）",
+    "max_star": 5
+  },
+  {
+    "id": 110801,
+    "jp_name": "クロエ",
+    "cn_name": "克萝依",
+    "max_star": 5
+  },
+  {
+    "id": 110901,
+    "jp_name": "チエル",
+    "cn_name": "琪爱儿",
+    "max_star": 5
+  },
+  {
+    "id": 111001,
+    "jp_name": "ユニ",
+    "cn_name": "优妮",
+    "max_star": 5
+  },
+  {
+    "id": 111101,
+    "jp_name": "キョウカ（ハロウィン）",
+    "cn_name": "镜华（万圣节）",
+    "max_star": 5
+  },
+  {
+    "id": 111201,
+    "jp_name": "ミソギ（ハロウィン）",
+    "cn_name": "未奏希（万圣节）",
+    "max_star": 5
+  },
+  {
+    "id": 111301,
+    "jp_name": "ミミ（ハロウィン）",
+    "cn_name": "美美（万圣节）",
+    "max_star": 5
+  },
+  {
+    "id": 111401,
+    "jp_name": "ルナ",
+    "cn_name": "露娜",
+    "max_star": 5
+  },
+  {
+    "id": 111501,
+    "jp_name": "クリスティーナ（クリスマス）",
+    "cn_name": "克里斯蒂娜·摩根（圣诞节）",
+    "max_star": 5
+  },
+  {
+    "id": 111601,
+    "jp_name": "ノゾミ（クリスマス）",
+    "cn_name": "望（圣诞节）",
+    "max_star": 5
+  },
+  {
+    "id": 111701,
+    "jp_name": "イリヤ（クリスマス）",
+    "cn_name": "伊莉雅·奥恩斯坦（圣诞节）",
+    "max_star": 5
+  },
+  {
+    "id": 111801,
+    "jp_name": "ペコリーヌ（ニューイヤー）",
+    "cn_name": "佩可莉姆（新年）",
+    "max_star": 5
+  },
+  {
+    "id": 111901,
+    "jp_name": "コッコロ（ニューイヤー）",
+    "cn_name": "可可萝（新年）",
+    "max_star": 5
+  },
+  {
+    "id": 112001,
+    "jp_name": "キャル（ニューイヤー）",
+    "cn_name": "凯露（新年）",
+    "max_star": 5
+  },
+  {
+    "id": 112101,
+    "jp_name": "スズメ（ニューイヤー）",
+    "cn_name": "铃莓（新年）",
+    "max_star": 5
+  },
+  {
+    "id": 112201,
+    "jp_name": "カスミ（マジカル）",
+    "cn_name": "霞（魔法少女）",
+    "max_star": 5
+  },
+  {
+    "id": 112301,
+    "jp_name": "シオリ（マジカル）",
+    "cn_name": "栞（魔法少女）",
+    "max_star": 5
+  },
+  {
+    "id": 112401,
+    "jp_name": "ウヅキ（デレマス）",
+    "cn_name": "岛村卯月（idol）",
+    "max_star": 5
+  },
+  {
+    "id": 112501,
+    "jp_name": "リン（デレマス）",
+    "cn_name": "铃花凛（idol）",
+    "max_star": 5
+  },
+  {
+    "id": 112601,
+    "jp_name": "ミオ（デレマス）",
+    "cn_name": "本田未央（デレマス）",
+    "max_star": 5
+  },
+  {
+    "id": 180401,
+    "jp_name": "ペコリーヌ（プリンセス）",
+    "cn_name": "佩可莉姆（公主）",
+    "max_star": 5
+  }
+]

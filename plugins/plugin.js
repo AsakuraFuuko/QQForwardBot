@@ -1,9 +1,14 @@
 const debug = require('debug')('plugin');
 const CQTAGS_EXTRACTOR = /\[CQ[^\]]*]/g;
 const CQTAG_ANALYSOR = /\[CQ:(.*)*]/;
+const touch = require("touch");
+const fs = require('fs');
+
+const configpath = './data/qqgroups.json';
 
 class Plugin {
     constructor(params) {
+        touch(configpath);
         this.tgbot = params.tgbot;
         this.Config = params.Config;
         this.qqbot = params.qqbot;
@@ -11,15 +16,21 @@ class Plugin {
         this.init();
     }
 
-    static onText(regex, message, callback) {
-        debug('Matching %s with %s', message, regex);
-        const result = regex.exec(message);
+    static onText(regex, messageChain, callback) {
+        let message_string = '';
+        for (let message of messageChain) {
+            if (message.type === 'Plain') {
+                message_string += message.text
+            }
+        }
+        debug('Matching %s with %s', message_string, regex);
+        const result = regex.exec(message_string);
         if (!result) {
             return false;
         }
         regex.lastIndex = 0;
         debug('Matches %s', regex);
-        callback(message, result);
+        callback(messageChain, result);
     }
 
     static parseTag(tag) {
@@ -118,6 +129,51 @@ class Plugin {
         return {tags, text: msg};
     }
 
+    getLinkedIDByGroupID(group_id) {
+        return this.getGroupSetting(group_id, 'linked_id')
+    }
+
+    getGroupIDByLinkedID(linked_id) {
+        let json = fs.readFileSync(configpath, 'utf8');
+        let groups = !!json ? JSON.parse(json) : [];
+        let group = groups.find(a => a.linked_id.toString() === linked_id.toString());
+        if (!!group) {
+            return group.group_id
+        } else {
+            return null
+        }
+    }
+
+    setGroupLinkedID(group_id, linked_id) {
+        this.setGroupSetting(group_id, 'linked_id', linked_id)
+    }
+
+    getGroupSetting(group_id, key) {
+        let json = fs.readFileSync(configpath, 'utf8');
+        let groups = !!json ? JSON.parse(json) : [];
+        let group = groups.find(a => a.group_id.toString() === group_id.toString());
+        if (!!group) {
+            return group[key];
+        } else {
+            return null;
+        }
+    }
+
+    setGroupSetting(group_id, key, value) {
+        let json = fs.readFileSync(configpath, 'utf8');
+        let groups = !!json ? JSON.parse(json) : [];
+        let group = groups.find(a => a.group_id.toString() === group_id.toString());
+        if (!!group) {
+            debug('已存在，替换');
+            let index = groups.indexOf(group);
+            groups[index][key] = value;
+        } else {
+            let obj = {group_id};
+            obj[key] = value;
+            groups.push(obj)
+        }
+        fs.writeFileSync(configpath, JSON.stringify(groups))
+    }
 }
 
 module.exports = Plugin;
