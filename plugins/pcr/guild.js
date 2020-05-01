@@ -28,16 +28,23 @@ class PCRGuild extends Plugin {
             if (msg_type === 'GroupMessage') {
                 chat_id = message.sender.group.id;
                 group_id = chat_id;
+                let linked_id = this.getLinkedIDByGroupID(group_id);
 
                 Plugin.onText(/公会战指令/, message.messageChain, async (msg, match) => {
                     debug(match);
                     let menu = this.menu.map(m => Plain(m));
+                    if (linked_id) {
+                        this.tgbot.sendMessage(linked_id, this.menu.join('\n')).catch(console.error)
+                    }
                     return this.qqbot.sendGroupMessage(menu, chat_id)
                 });
 
                 Plugin.onText(/公会战管理指令/, message.messageChain, async (msg, match) => {
                     debug(match);
                     let menu = this.opmenu.map(m => Plain(m));
+                    if (linked_id) {
+                        this.tgbot.sendMessage(linked_id, this.opmenu.join('\n')).catch(console.error)
+                    }
                     return this.qqbot.sendGroupMessage(menu, chat_id)
                 });
 
@@ -55,6 +62,9 @@ class PCRGuild extends Plugin {
                     reply.push('进度：BOSS (' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
                     reply.push('当前出刀者:\n' + (current_boss.attacker_list.length > 0 ? current_boss.attacker_list.map(a => a.name).join(', ') : '无'));
                     reply.push('当前挂树者:\n' + (current_boss.tree_list.length > 0 ? current_boss.tree_list.map(a => a.name).join(', ') : '无'));
+                    if (linked_id) {
+                        this.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                    }
                     return this.qqbot.sendGroupMessage([Plain(reply.join('\n'))], chat_id)
                 });
 
@@ -73,6 +83,9 @@ class PCRGuild extends Plugin {
                     let boss = this.getGuildSetting(guild_id, 'boss');
                     if (boss[boss_id]) {
                         this.updateBookingList(guild_id, id, name, parseInt(boss_id));
+                        if (linked_id) {
+                            this.tgbot.sendMessage(linked_id, 'BOSS(' + boss_id + ')预约完毕').catch(console.error)
+                        }
                         return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')预约完毕')], chat_id)
                     } else {
                         return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')不存在')], chat_id)
@@ -104,6 +117,9 @@ class PCRGuild extends Plugin {
                             attacker_list.push({id, name});
                             this.setGuildCurrentBoss(guild_id, current_boss)
                         }
+                        if (linked_id) {
+                            this.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                        }
                         return this.qqbot.sendGroupMessage([Plain(reply.join('\n'))], chat_id)
                     }
                 });
@@ -131,6 +147,9 @@ class PCRGuild extends Plugin {
                             attacker_list.push({id, name});
                         }
                         this.setGuildCurrentBoss(guild_id, current_boss);
+                        if (linked_id) {
+                            this.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                        }
                         return this.qqbot.sendGroupMessage([Plain(reply.join('\n'))], chat_id)
                     }
                 });
@@ -164,6 +183,9 @@ class PCRGuild extends Plugin {
                             current_boss.hp = current_boss.hp - hp;
                             if (current_boss.hp > 0) {
                                 this.setGuildCurrentBoss(guild_id, current_boss);
+                                if (linked_id) {
+                                    this.tgbot.sendMessage(linked_id, '进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp).catch(console.error)
+                                }
                                 return this.qqbot.sendGroupMessage([Plain('进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp)], chat_id)
                             } else {
                                 // 打屎了
@@ -182,6 +204,9 @@ class PCRGuild extends Plugin {
                                     }
                                 }
                                 this.setGuildSetting(guild_id, 'booking_list', booking_list.filter(b => !!b));
+                                if (linked_id) {
+                                    this.tgbot.sendMessage(linked_id, reply.map(r => r.text || r.target).join('\n')).catch(console.error)
+                                }
                                 return this.qqbot.sendGroupMessage(reply, chat_id);
                             }
                         }
@@ -217,6 +242,9 @@ class PCRGuild extends Plugin {
                             reply.push('申请挂树成功')
                         }
                         this.setGuildCurrentBoss(guild_id, current_boss);
+                        if (linked_id) {
+                            this.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                        }
                         return this.qqbot.sendGroupMessage([Plain(reply.join('\n'))], chat_id)
                     }
                 });
