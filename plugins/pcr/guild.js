@@ -371,6 +371,32 @@ class PCRGuild extends Plugin {
             reply.push('当前挂树者:\n' + (current_boss.tree_list.length > 0 ? current_boss.tree_list.map(a => a.name).join(', ') : '无'));
             return this.tgbot.sendMessage(chat_id, reply.join('\n'))
         });
+
+        this.tgbot.onText(/\/guild_boss_booking(@\w+)?(?: )?(\d+)?/, async (msg, match) => {
+            let chat_id = msg.chat.id;
+            let user_id = msg.from.id;
+            let name = (msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name;
+            let bot_name = match[1];
+            if (bot_name && bot_name !== this.botname) {
+                return;
+            }
+            let group_id = this.getGroupIDByLinkedID(chat_id);
+            let guild_id = this.getGroupSetting(group_id, 'guild_id');
+            if (!guild_id) {
+                return this.tgbot.sendMessage(chat_id, '未绑定公会')
+            }
+            let boss_id = match[1];
+            if (!boss_id) {
+                return this.tgbot.sendMessage(chat_id, '需要boss id')
+            }
+            let boss = this.getGuildSetting(guild_id, 'boss');
+            if (boss[boss_id]) {
+                this.updateBookingList(guild_id, this.Config.qqbot.account, name, parseInt(boss_id));
+                return this.tgbot.sendMessage(chat_id, 'BOSS(' + boss_id + ')预约完毕');
+            } else {
+                return this.tgbot.sendMessage(chat_id, 'BOSS(' + boss_id + ')不存在');
+            }
+        });
     }
 
     getGuildName(guild_id) {
