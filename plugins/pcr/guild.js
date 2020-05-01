@@ -17,7 +17,7 @@ class PCRGuild extends Plugin {
             '可用公会战指令：\n', 'BOSS战况\n', 'BOSS预约 编号\n', 'BOSS申请出刀\n', 'BOSS强制出刀\n', 'BOSS报刀 伤害\n', 'BOSS挂树\n\n'
         ];
         this.opmenu = [
-            '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', '添加BOSS\n', 'BOSS列表\n', '设置当前BOSS\n', '更新BOSS\n'
+            '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', 'BOSS列表\n', '设置当前BOSS\n', '更新BOSS 123 x 123 x 123 (x为不更新)\n'
         ]
     }
 
@@ -41,15 +41,11 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage(menu, chat_id)
                 });
 
-                Plugin.onText(/(?:BOSS|boss|^)战况/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/(?:BOSS|boss|^[!|！])战况/, message.messageChain, async (msg, match) => {
                     debug(match);
                     let guild_id = this.getGroupSetting(group_id, 'guild_id');
                     if (!guild_id) {
                         return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let boss = this.getGuildSetting(guild_id, 'boss') || [];
-                    if (boss.length === 0) {
-                        return this.qqbot.sendGroupMessage([Plain('请先添加一个BOSS')], chat_id)
                     }
                     let current_boss = this.getGuildCurrentBoss(guild_id);
                     if (!current_boss) {
@@ -62,7 +58,7 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain(reply.join('\n'))], chat_id)
                 });
 
-                Plugin.onText(/(?:BOSS|boss|^)预约(?: )?(?<boss_id>\d+)?/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/(?:BOSS|boss|^[!|！])预约(?: )?(?<boss_id>\d+)?/, message.messageChain, async (msg, match) => {
                     debug(match);
                     let name = message.sender.memberName;
                     let id = message.sender.id;
@@ -70,10 +66,6 @@ class PCRGuild extends Plugin {
                     let guild_id = this.getGroupSetting(group_id, 'guild_id');
                     if (!guild_id) {
                         return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let boss = this.getGuildSetting(guild_id, 'boss') || [];
-                    if (boss.length === 0) {
-                        return this.qqbot.sendGroupMessage([Plain('请先添加一个BOSS')], chat_id)
                     }
                     if (!boss_id) {
                         return this.qqbot.sendGroupMessage([Plain('需要BOSS Id')], chat_id)
@@ -86,17 +78,13 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/(?:BOSS|boss|^)申请(?:出刀)?/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/(?:BOSS|boss|^[!|！])申请(?:出刀)?/, message.messageChain, async (msg, match) => {
                     debug(match);
                     let name = message.sender.memberName;
                     let id = message.sender.id;
                     let guild_id = this.getGroupSetting(group_id, 'guild_id');
                     if (!guild_id) {
                         return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let boss = this.getGuildSetting(guild_id, 'boss') || [];
-                    if (boss.length === 0) {
-                        return this.qqbot.sendGroupMessage([Plain('请先添加一个BOSS')], chat_id)
                     }
                     let current_boss = this.getGuildCurrentBoss(guild_id);
                     if (current_boss) {
@@ -119,17 +107,13 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/(?:BOSS|boss|^)强制出刀/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/(?:BOSS|boss|^[!|！])强制出刀/, message.messageChain, async (msg, match) => {
                     debug(match);
                     let name = message.sender.memberName;
                     let id = message.sender.id;
                     let guild_id = this.getGroupSetting(group_id, 'guild_id');
                     if (!guild_id) {
                         return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let boss = this.getGuildSetting(guild_id, 'boss') || [];
-                    if (boss.length === 0) {
-                        return this.qqbot.sendGroupMessage([Plain('请先添加一个BOSS')], chat_id)
                     }
                     let current_boss = this.getGuildCurrentBoss(guild_id);
                     if (current_boss) {
@@ -150,17 +134,13 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/(?:BOSS|boss|^)报刀(?: )?(?<hp>\d+)(?<unit>w|W|万)?/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>w|W|万)?/, message.messageChain, async (msg, match) => {
                     debug(match);
                     let name = message.sender.memberName;
                     let id = message.sender.id;
                     let guild_id = this.getGroupSetting(group_id, 'guild_id');
                     if (!guild_id) {
                         return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let boss = this.getGuildSetting(guild_id, 'boss') || [];
-                    if (boss.length === 0) {
-                        return this.qqbot.sendGroupMessage([Plain('请先添加一个BOSS')], chat_id)
                     }
                     let current_boss = this.getGuildCurrentBoss(guild_id);
                     if (current_boss) {
@@ -207,17 +187,13 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/(?:BOSS|boss|^)挂树/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/(?:BOSS|boss|^[!|！])挂树/, message.messageChain, async (msg, match) => {
                     debug(match);
                     let name = message.sender.memberName;
                     let id = message.sender.id;
                     let guild_id = this.getGroupSetting(group_id, 'guild_id');
                     if (!guild_id) {
                         return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let boss = this.getGuildSetting(guild_id, 'boss') || [];
-                    if (boss.length === 0) {
-                        return this.qqbot.sendGroupMessage([Plain('请先添加一个BOSS')], chat_id)
                     }
                     let current_boss = this.getGuildCurrentBoss(guild_id);
                     if (current_boss) {
@@ -244,7 +220,7 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/创建公会(?: )?(.*)/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/^创建公会(?: )?(.*)/, message.messageChain, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -259,7 +235,7 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/绑定公会(?: )?(\d+)?/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/^绑定公会(?: )?(\d+)?/, message.messageChain, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -275,25 +251,6 @@ class PCRGuild extends Plugin {
                         this.setGroupSetting(group_id, 'guild_id', guild_id);
                         let guild_name = this.getGuildName(guild_id);
                         return this.qqbot.sendGroupMessage([Plain('公会['), Plain(guild_name), Plain(']('), Plain(guild_id), Plain(')绑定本群')], chat_id)
-                    }
-                });
-
-                Plugin.onText(/添加(?:默认)?(?:BOSS|boss)(?: )?(?<max_hp>\d+)?/, message.messageChain, async (msg, match) => {
-                    debug(match);
-                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
-                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
-                    }
-                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
-                    if (!guild_id) {
-                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    if (!(match[0].includes('默认') || match.groups.max_hp)) {
-                        return this.qqbot.sendGroupMessage([Plain('需要BOSS MaxHP')], chat_id)
-                    } else {
-                        let max_hp = !!match.groups.max_hp ? parseInt(match.groups.max_hp) : -1;
-                        let result = this.addBoss(guild_id, max_hp);
-                        result = result.map((r, i) => 'BOSS(' + (i + 1) + ') MaxHP: ' + r);
-                        return this.qqbot.sendGroupMessage([Plain(result.join('\n'))], chat_id)
                     }
                 });
 
@@ -316,7 +273,7 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain(boss.join('\n'))], chat_id)
                 });
 
-                Plugin.onText(/设置当前(?:BOSS|boss)(?: )?(?<boss_id>\d+)?/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/^设置当前(?:BOSS|boss)(?: )?(?<boss_id>\d+)?/, message.messageChain, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -325,10 +282,6 @@ class PCRGuild extends Plugin {
                     let guild_id = this.getGroupSetting(group_id, 'guild_id');
                     if (!guild_id) {
                         return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let boss = this.getGuildSetting(guild_id, 'boss') || [];
-                    if (boss.length === 0) {
-                        return this.qqbot.sendGroupMessage([Plain('请先添加一个BOSS')], chat_id)
                     }
                     if (!boss_id) {
                         return this.qqbot.sendGroupMessage([Plain('需要BOSS Id')], chat_id)
@@ -341,33 +294,27 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/更新(?:BOSS|boss)(?: )?(?<boss_id>\d+)?(?: )?(?<max_hp>\d+)?/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/^更新(?:BOSS|boss)(?: )?(?<max_hp>.*)/, message.messageChain, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
                     }
-                    let boss_id = parseInt(match.groups.boss_id), max_hp = parseInt(match.groups.max_hp);
                     let guild_id = this.getGroupSetting(group_id, 'guild_id');
                     if (!guild_id) {
                         return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
                     }
-                    let boss = this.getGuildSetting(guild_id, 'boss') || [];
-                    if (boss.length === 0) {
-                        return this.qqbot.sendGroupMessage([Plain('请先添加一个BOSS')], chat_id)
-                    }
-                    if (!boss_id) {
-                        return this.qqbot.sendGroupMessage([Plain('需要BOSS Id')], chat_id)
-                    }
+                    let max_hp = match.groups.max_hp;
                     if (!max_hp) {
-                        return this.qqbot.sendGroupMessage([Plain('需要BOSS MaxHP')], chat_id)
+                        return this.qqbot.sendGroupMessage([Plain('需要参数')], chat_id)
                     }
-                    if (boss[boss_id - 1]) {
-                        boss[boss_id - 1] = max_hp;
-                        this.setGuildSetting(guild_id, 'boss', boss);
-                        return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')更新完毕, MaxHP: ' + boss[boss_id - 1])], chat_id)
-                    } else {
-                        return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')不存在')], chat_id)
-                    }
+                    max_hp = max_hp.trim().split(' ');
+                    this.updateBossList(guild_id, max_hp);
+                    let boss = this.getGuildSetting(guild_id, 'boss');
+                    boss = boss.map((b, i) => {
+                        return 'BOSS(' + (i + 1) + ') MaxHP: ' + b;
+                    });
+                    boss.splice(0, 0, '更新完成, 如需要请设置当前boss');
+                    return this.qqbot.sendGroupMessage([Plain(boss.join('\n'))], chat_id)
                 });
             }
         });
@@ -400,7 +347,9 @@ class PCRGuild extends Plugin {
                 break;
             }
         }
+        let default_boss = [8000000, 12000000, 20000000, 40000000, 80000000];
         this.setGuildSetting(guild_id, 'guild_name', guild_name);
+        this.setGuildSetting(guild_id, 'boss', default_boss);
         return {guild_id, guild_name}
     }
 
@@ -413,6 +362,21 @@ class PCRGuild extends Plugin {
             booking_list = Utils.removeArrayItem(booking_list, book)
         }
         this.setGuildSetting(guild_id, 'booking_list', booking_list)
+    }
+
+    updateBossList(guild_id, boss) {
+        let new_boss_list = [];
+        let old_boss_list = this.getGuildSetting(guild_id, 'boss') || [];
+        for (let i = 0; i < boss.length; i++) {
+            let b = boss[i];
+            if (b !== 'x') {
+                b = parseInt(b);
+                new_boss_list[i] = b;
+            } else {
+                new_boss_list[i] = old_boss_list[i] || 0;
+            }
+        }
+        this.setGuildSetting(guild_id, 'boss', new_boss_list)
     }
 
     setGuildCurrentBossById(guild_id, boss_id) {
@@ -434,21 +398,6 @@ class PCRGuild extends Plugin {
 
     getGuildCurrentBoss(guild_id) {
         return this.getGuildSetting(guild_id, 'current_boss')
-    }
-
-    addBoss(guild_id, max_hp) {
-        let new_boss = [], default_boss = [8000000, 12000000, 20000000, 40000000, 80000000];
-        let boss = this.getGuildSetting(guild_id, 'boss') || [];
-        if (max_hp === -1) {
-            new_boss = default_boss;
-            boss = [];
-        } else {
-            new_boss.push(max_hp);
-        }
-        boss = boss.concat(new_boss);
-        boss.sort((a, b) => a - b);
-        this.setGuildSetting(guild_id, 'boss', boss);
-        return new_boss
     }
 
     getGuildSetting(guild_id, key) {
