@@ -358,7 +358,7 @@ class PCRGuild extends Plugin {
             }
             let group_id = this.getGroupIDByLinkedID(chat_id);
             let guild_id = this.getGroupSetting(group_id, 'guild_id');
-            if (guild_id) {
+            if (!guild_id) {
                 return this.tgbot.sendMessage(chat_id, '未绑定公会')
             }
             let current_boss = this.getGuildCurrentBoss(guild_id);
