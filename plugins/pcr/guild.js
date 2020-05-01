@@ -349,16 +349,28 @@ class PCRGuild extends Plugin {
             }
         });
 
-        /*
-        this.tgbot.onText(/\/gacha(@\w+)?/, async (msg, match) => {
+        this.tgbot.onText(/\/guild_boss_status(@\w+)?/, async (msg, match) => {
             let chat_id = msg.chat.id;
             let user_id = msg.from.id;
             let bot_name = match[1];
             if (bot_name && bot_name !== this.botname) {
                 return;
             }
+            let group_id = this.getGroupIDByLinkedID(chat_id);
+            let guild_id = this.getGroupSetting(group_id, 'guild_id');
+            if (guild_id) {
+                return this.tgbot.sendMessage(chat_id, '未绑定公会')
+            }
+            let current_boss = this.getGuildCurrentBoss(guild_id);
+            if (!current_boss) {
+                current_boss = this.setGuildCurrentBossById(guild_id, 1);
+            }
+            let reply = [];
+            reply.push('进度：BOSS (' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
+            reply.push('当前出刀者:\n' + (current_boss.attacker_list.length > 0 ? current_boss.attacker_list.map(a => a.name).join(', ') : '无'));
+            reply.push('当前挂树者:\n' + (current_boss.tree_list.length > 0 ? current_boss.tree_list.map(a => a.name).join(', ') : '无'));
+            return this.tgbot.sendMessage(chat_id, reply.join('\n'))
         });
-        */
     }
 
     getGuildName(guild_id) {
