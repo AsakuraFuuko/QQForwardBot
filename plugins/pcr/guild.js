@@ -82,11 +82,11 @@ class PCRGuild extends Plugin {
                     }
                     let boss = this.getGuildSetting(guild_id, 'boss');
                     if (boss[boss_id]) {
-                        this.updateBookingList(guild_id, id, name, parseInt(boss_id));
+                        let result = this.updateBookingList(guild_id, id, name, parseInt(boss_id));
                         if (linked_id) {
-                            this.tgbot.sendMessage(linked_id, 'BOSS(' + boss_id + ')预约完毕').catch(console.error)
+                            this.tgbot.sendMessage(linked_id, 'BOSS(' + boss_id + ')' + result ? '预约完毕' : '取消预约').catch(console.error)
                         }
-                        return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')预约完毕')], chat_id)
+                        return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')' + result ? '预约完毕' : '取消预约')], chat_id)
                     } else {
                         return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')不存在')], chat_id)
                     }
@@ -391,12 +391,14 @@ class PCRGuild extends Plugin {
             }
             let boss = this.getGuildSetting(guild_id, 'boss');
             if (boss[boss_id]) {
-                this.updateBookingList(guild_id, this.Config.qqbot.account, name, parseInt(boss_id));
-                return this.tgbot.sendMessage(chat_id, 'BOSS(' + boss_id + ')预约完毕');
+                let result = this.updateBookingList(guild_id, this.Config.qqbot.account, name, parseInt(boss_id));
+                return this.tgbot.sendMessage(chat_id, 'BOSS(' + boss_id + ')' + result ? '预约完毕' : '取消预约');
             } else {
                 return this.tgbot.sendMessage(chat_id, 'BOSS(' + boss_id + ')不存在');
             }
         });
+
+
     }
 
     getGuildName(guild_id) {
@@ -422,14 +424,18 @@ class PCRGuild extends Plugin {
     }
 
     updateBookingList(guild_id, id, name, boss_id) {
+        let result;
         let booking_list = this.getGuildSetting(guild_id, 'booking_list') || [];
         let book = booking_list.find(b => !!b && b.id === id && b.boss_id === boss_id);
         if (!book) {
-            booking_list.push({id, name, boss_id})
+            booking_list.push({id, name, boss_id});
+            result = true
         } else {
-            booking_list = Utils.removeArrayItem(booking_list, book)
+            booking_list = Utils.removeArrayItem(booking_list, book);
+            result = false
         }
-        this.setGuildSetting(guild_id, 'booking_list', booking_list)
+        this.setGuildSetting(guild_id, 'booking_list', booking_list);
+        return result
     }
 
     updateBossList(guild_id, boss) {
