@@ -70,6 +70,7 @@ class PCRGuild extends Plugin {
                     if (!boss_id) {
                         return this.qqbot.sendGroupMessage([Plain('需要BOSS Id')], chat_id)
                     }
+                    let boss = this.getGuildSetting(guild_id, 'boss');
                     if (boss[boss_id]) {
                         this.updateBookingList(guild_id, id, name, parseInt(boss_id));
                         return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')预约完毕')], chat_id)
@@ -286,6 +287,7 @@ class PCRGuild extends Plugin {
                     if (!boss_id) {
                         return this.qqbot.sendGroupMessage([Plain('需要BOSS Id')], chat_id)
                     }
+                    let boss = this.getGuildSetting(guild_id, 'boss');
                     if (boss[boss_id - 1]) {
                         this.setGuildCurrentBossById(guild_id, boss_id);
                         return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')设置完毕, MaxHP: ' + boss[boss_id - 1])], chat_id)
