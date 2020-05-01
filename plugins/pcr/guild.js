@@ -385,7 +385,7 @@ class PCRGuild extends Plugin {
             if (!guild_id) {
                 return this.tgbot.sendMessage(chat_id, '未绑定公会')
             }
-            let boss_id = match[1];
+            let boss_id = match[2];
             if (!boss_id) {
                 return this.tgbot.sendMessage(chat_id, '需要boss id')
             }
