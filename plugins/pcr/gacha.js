@@ -23,7 +23,7 @@ class PCRGacha extends Plugin {
                 chat_id = message.sender.id
             }
 
-            Plugin.onText(/boomcr(:?10|十)[连|連]/, message.messageChain, async (msg, match) => {
+            Plugin.onText(/boomcr(:?10|十)[连|連]/, message, async (msg, match) => {
                 debug(match);
                 let result = this.getGacha();
                 let path = './download/pcr/' + Utils.getRandomString() + '.png';

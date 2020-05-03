@@ -10,7 +10,7 @@ const PluginQQForward = require('./plugins/qqforward');
 // const PluginKanColleTime = require('./plugins/kancolletime');
 // const PluginOther = require('./plugins/other');
 
-// const PluginPCRGacha = require('./plugins/pcr/gacha');
+const PluginPCRGacha = require('./plugins/pcr/gacha');
 const PluginPCRGuild = require('./plugins/pcr/guild');
 
 const tgbot = new TelegramBot(Config.tgbot.token, {polling: true});
@@ -56,6 +56,8 @@ tgbot.onText(/\/clean_data(@\w+)?/, (msg, match) => {
     });
     // return tgbot.sendMessage(chat_id, JSON.stringify(msg, null, 2))
 });
+
+tgbot.on("polling_error", (err) => console.log(err));
 // other end
 
 // qqbot start
@@ -81,11 +83,11 @@ qqbot.onSignal('verified', async () => {
 // new PluginMusic({tgbot, Config, qqbot});
 // new PluginKanColleTime({tgbot, Config, qqbot});
 // new PluginOther({tgbot, Config, qqbot});
-new PluginQQForward({tgbot, Config, qqbot, botname});
 
-// new PluginPCRGacha({tgbot, Config, qqbot, botname});
+new PluginPCRGacha({tgbot, Config, qqbot, botname});
 new PluginPCRGuild({tgbot, Config, qqbot, botname});
 
+new PluginQQForward({tgbot, Config, qqbot, botname});
 qqbot.listen('all');
 
 process.on('unhandledRejection', (reason) => {

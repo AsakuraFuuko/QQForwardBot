@@ -16,9 +16,9 @@ class Plugin {
         this.init();
     }
 
-    static onText(regex, messageChain, callback) {
+    static onText(regex, msg, callback) {
         let message_string = '';
-        for (let message of messageChain) {
+        for (let message of msg.messageChain) {
             if (message.type === 'Plain') {
                 message_string += message.text
             }
@@ -30,7 +30,7 @@ class Plugin {
         }
         regex.lastIndex = 0;
         debug('Matches %s', regex);
-        callback(messageChain, result);
+        callback(msg, result);
     }
 
     static parseTag(tag) {
@@ -136,7 +136,7 @@ class Plugin {
     getGroupIDByLinkedID(linked_id) {
         let json = fs.readFileSync(configpath, 'utf8');
         let groups = !!json ? JSON.parse(json) : [];
-        let group = groups.find(a => a.linked_id.toString() === linked_id.toString());
+        let group = groups.find(a => a.linked_id && (a.linked_id.toString() === linked_id.toString()));
         if (!!group) {
             return group.group_id
         } else {

@@ -22,6 +22,7 @@ class PCRGuild extends Plugin {
     }
 
     init() {
+        let that = this;
         this.qqbot.onMessage(async (message) => {
             debug(message);
             let msg_type = message.type, chat_id, group_id, permission = message.sender.permission;
@@ -30,226 +31,37 @@ class PCRGuild extends Plugin {
                 group_id = chat_id;
                 let linked_id = this.getLinkedIDByGroupID(group_id);
 
-                Plugin.onText(/公会战指令/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/公会战指令/, message, async (msg, match) => {
                     debug(match);
                     let menu = this.menu.map(m => Plain(m));
                     if (linked_id) {
-                        this.tgbot.sendMessage(linked_id, this.menu.join('\n')).catch(console.error)
+                        this.tgbot.sendMessage(linked_id, this.menu.join('')).catch(console.error)
                     }
                     return this.qqbot.sendGroupMessage(menu, chat_id)
                 });
 
-                Plugin.onText(/公会战管理指令/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/公会战管理指令/, message, async (msg, match) => {
                     debug(match);
                     let menu = this.opmenu.map(m => Plain(m));
                     if (linked_id) {
-                        this.tgbot.sendMessage(linked_id, this.opmenu.join('\n')).catch(console.error)
+                        this.tgbot.sendMessage(linked_id, this.opmenu.join('')).catch(console.error)
                     }
                     return this.qqbot.sendGroupMessage(menu, chat_id)
                 });
 
-                Plugin.onText(/(?:BOSS|boss|^[!|！])战况/, message.messageChain, async (msg, match) => {
-                    debug(match);
-                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
-                    if (!guild_id) {
-                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let current_boss = this.getGuildCurrentBoss(guild_id);
-                    if (!current_boss) {
-                        current_boss = this.setGuildCurrentBossById(guild_id, 1);
-                    }
-                    let reply = [];
-                    reply.push('进度：BOSS (' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
-                    reply.push('当前出刀者:\n' + (current_boss.attacker_list.length > 0 ? current_boss.attacker_list.map(a => a.name).join(', ') : '无'));
-                    reply.push('当前挂树者:\n' + (current_boss.tree_list.length > 0 ? current_boss.tree_list.map(a => a.name).join(', ') : '无'));
-                    if (linked_id) {
-                        this.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
-                    }
-                    return this.qqbot.sendGroupMessage([Plain(reply.join('\n'))], chat_id)
-                });
+                Plugin.onText(/(?:BOSS|boss|^[!|！])战况/, message, guild_boss_status);
 
-                Plugin.onText(/(?:BOSS|boss|^[!|！])预约(?: )?(?<boss_id>\d+)?/, message.messageChain, async (msg, match) => {
-                    debug(match);
-                    let name = message.sender.memberName;
-                    let id = message.sender.id;
-                    let boss_id = match.groups.boss_id;
-                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
-                    if (!guild_id) {
-                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    if (!boss_id) {
-                        return this.qqbot.sendGroupMessage([Plain('需要BOSS Id')], chat_id)
-                    }
-                    let boss = this.getGuildSetting(guild_id, 'boss');
-                    if (boss[boss_id]) {
-                        let result = this.updateBookingList(guild_id, id, name, parseInt(boss_id));
-                        if (linked_id) {
-                            this.tgbot.sendMessage(linked_id, 'BOSS(' + boss_id + ')' + (result ? '预约完毕' : '取消预约')).catch(console.error)
-                        }
-                        return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')' + (result ? '预约完毕' : '取消预约'))], chat_id)
-                    } else {
-                        return this.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')不存在')], chat_id)
-                    }
-                });
+                Plugin.onText(/(?:BOSS|boss|^[!|！])预约(?: )?(?<boss_id>\d+)?/, message, guild_boss_booking);
 
-                Plugin.onText(/(?:BOSS|boss|^[!|！])申请(?:出刀)?/, message.messageChain, async (msg, match) => {
-                    debug(match);
-                    let name = message.sender.memberName;
-                    let id = message.sender.id;
-                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
-                    if (!guild_id) {
-                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let current_boss = this.getGuildCurrentBoss(guild_id);
-                    if (current_boss) {
-                        let reply = [];
-                        let attacker_list = current_boss.attacker_list;
-                        let tree_list = current_boss.tree_list;
-                        if (attacker_list.length > 0) {
-                            reply.push('当前出刀者: \n' + attacker_list.map(a => a.name).join(', '))
-                        } else {
-                            reply.push('申请成功，请出刀');
-                            reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
-                            let tree = tree_list.find(t => t.id === id);
-                            if (tree) {
-                                tree_list = Utils.removeArrayItem(tree_list, tree);
-                            }
-                            attacker_list.push({id, name});
-                            this.setGuildCurrentBoss(guild_id, current_boss)
-                        }
-                        if (linked_id) {
-                            this.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
-                        }
-                        return this.qqbot.sendGroupMessage([Plain(reply.join('\n'))], chat_id)
-                    }
-                });
+                Plugin.onText(/(?:BOSS|boss|^[!|！])申请(?:出刀)?/, message, guild_boss_request);
 
-                Plugin.onText(/(?:BOSS|boss|^[!|！])强制出刀/, message.messageChain, async (msg, match) => {
-                    debug(match);
-                    let name = message.sender.memberName;
-                    let id = message.sender.id;
-                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
-                    if (!guild_id) {
-                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let current_boss = this.getGuildCurrentBoss(guild_id);
-                    if (current_boss) {
-                        let reply = [];
-                        let attacker_list = current_boss.attacker_list;
-                        let tree_list = current_boss.tree_list;
-                        reply.push('申请成功，请出刀');
-                        reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
-                        let tree = tree_list.find(t => t.id === id);
-                        if (tree) {
-                            tree_list = Utils.removeArrayItem(tree_list, tree);
-                        }
-                        if (!attacker_list.includes(a => a.id === id)) {
-                            attacker_list.push({id, name});
-                        }
-                        this.setGuildCurrentBoss(guild_id, current_boss);
-                        if (linked_id) {
-                            this.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
-                        }
-                        return this.qqbot.sendGroupMessage([Plain(reply.join('\n'))], chat_id)
-                    }
-                });
+                Plugin.onText(/(?:BOSS|boss|^[!|！])强制出刀/, message, guild_force_boss_request);
 
-                Plugin.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>w|W|万)?/, message.messageChain, async (msg, match) => {
-                    debug(match);
-                    let name = message.sender.memberName;
-                    let id = message.sender.id;
-                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
-                    if (!guild_id) {
-                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let current_boss = this.getGuildCurrentBoss(guild_id);
-                    if (current_boss) {
-                        let reply = [];
-                        let attacker_list = current_boss.attacker_list;
-                        let tree_list = current_boss.tree_list;
-                        let attacker = attacker_list.find(a => a.id === id);
-                        if (!attacker) {
-                            return this.qqbot.sendGroupMessage([Plain('请先申请出刀')], chat_id)
-                        } else {
-                            attacker_list = Utils.removeArrayItem(attacker_list, attacker);
-                            let hp = match.groups.hp;
-                            let unit = match.groups.unit;
-                            if (!hp) {
-                                return this.qqbot.sendGroupMessage([Plain('需要HP')], chat_id)
-                            }
-                            if (unit) {
-                                hp = hp * 10000;
-                            }
-                            current_boss.hp = current_boss.hp - hp;
-                            if (current_boss.hp > 0) {
-                                this.setGuildCurrentBoss(guild_id, current_boss);
-                                if (linked_id) {
-                                    this.tgbot.sendMessage(linked_id, '进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp).catch(console.error)
-                                }
-                                return this.qqbot.sendGroupMessage([Plain('进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp)], chat_id)
-                            } else {
-                                // 打屎了
-                                let next_id = current_boss.id + 1;//, round = parseInt(next_id / 5) + 1;
-                                next_id >= 6 ? next_id = 1 : next_id;
-                                let booking_list = this.getGuildSetting(guild_id, 'booking_list');
-                                reply.push(Plain('当前BOSS已死，可下树玩家：\n'));
-                                tree_list.map(t => reply.push(At(t.id)));
-                                current_boss = this.setGuildCurrentBossById(guild_id, next_id);
-                                reply.push(Plain('\nBOSS(' + current_boss.id + ') MaxHP: ' + current_boss.max_hp + ' 已开启，预订提醒：\n'));
-                                for (let book of booking_list) {
-                                    if (book.boss_id === next_id) {
-                                        reply.push(At(book.id));
-                                        let index = booking_list.indexOf(book);
-                                        delete booking_list[index];
-                                    }
-                                }
-                                this.setGuildSetting(guild_id, 'booking_list', booking_list.filter(b => !!b));
-                                if (linked_id) {
-                                    this.tgbot.sendMessage(linked_id, reply.map(r => r.text || r.target).join('\n')).catch(console.error)
-                                }
-                                return this.qqbot.sendGroupMessage(reply, chat_id);
-                            }
-                        }
-                    }
-                });
+                Plugin.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>w|W|万)?/, message, guild_boss_damage);
 
-                Plugin.onText(/(?:BOSS|boss|^[!|！])挂树/, message.messageChain, async (msg, match) => {
-                    debug(match);
-                    let name = message.sender.memberName;
-                    let id = message.sender.id;
-                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
-                    if (!guild_id) {
-                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                    }
-                    let current_boss = this.getGuildCurrentBoss(guild_id);
-                    if (current_boss) {
-                        let reply = [];
-                        let attacker_list = current_boss.attacker_list;
-                        let tree_list = current_boss.tree_list;
-                        let attacker = attacker_list.find(a => a.id === id);
-                        if (attacker) {
-                            attacker_list = Utils.removeArrayItem(attacker_list, attacker)
-                        }
-                        let tree = tree_list.find(t => t.id === id);
-                        if (tree && !attacker) {
-                            tree_list = Utils.removeArrayItem(tree_list, tree);
-                            reply.push('已经在树上了')
-                        } else {
-                            if (!attacker) {
-                                return this.qqbot.sendGroupMessage([Plain('未申请出刀')], chat_id)
-                            }
-                            tree_list.push({id, name});
-                            reply.push('申请挂树成功')
-                        }
-                        this.setGuildCurrentBoss(guild_id, current_boss);
-                        if (linked_id) {
-                            this.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
-                        }
-                        return this.qqbot.sendGroupMessage([Plain(reply.join('\n'))], chat_id)
-                    }
-                });
+                Plugin.onText(/(?:BOSS|boss|^[!|！])挂树/, message, guild_boss_up_the_tree);
 
-                Plugin.onText(/^创建公会(?: )?(.*)/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/^创建公会(?: )?(.*)/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -264,7 +76,7 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/^绑定公会(?: )?(\d+)?/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/^绑定公会(?: )?(\d+)?/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -283,7 +95,7 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/(?:BOSS|boss)列表/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/(?:BOSS|boss)列表/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -302,7 +114,7 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain(boss.join('\n'))], chat_id)
                 });
 
-                Plugin.onText(/^设置当前(?:BOSS|boss)(?: )?(?<boss_id>\d+)?/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/^设置当前(?:BOSS|boss)(?: )?(?<boss_id>\d+)?/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -324,7 +136,7 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/^更新(?:BOSS|boss)(?: )?(?<max_hp>.*)/, message.messageChain, async (msg, match) => {
+                Plugin.onText(/^更新(?:BOSS|boss)(?: )?(?<max_hp>.*)/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -349,55 +161,284 @@ class PCRGuild extends Plugin {
             }
         });
 
-        this.tgbot.onText(/\/guild_boss_status(@\w+)?/, async (msg, match) => {
-            let chat_id = msg.chat.id;
-            let user_id = msg.from.id;
-            let bot_name = match[1];
-            if (bot_name && bot_name !== this.botname) {
-                return;
-            }
-            let group_id = this.getGroupIDByLinkedID(chat_id);
-            let guild_id = this.getGroupSetting(group_id, 'guild_id');
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])战况/, guild_boss_status);
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])预约(?: )?(?<boss_id>\d+)?/, guild_boss_booking);
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])申请(?:出刀)?/, guild_boss_request);
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])强制出刀/, guild_force_boss_request);
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>w|W|万)?/, guild_boss_damage);
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])挂树/, guild_boss_up_the_tree);
+
+        async function guild_boss_status(msg, match) {
+            debug(match);
+            let is_tg = !!msg.from;
+            let user_id = is_tg ? msg.from.id : msg.sender.id;
+            let user_name = is_tg ? ((msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name) : msg.sender.memberName;
+            let group_id = is_tg ? that.getGroupIDByLinkedID(msg.chat.id) : msg.sender.group.id;
+            let linked_id = is_tg ? msg.chat.id : that.getLinkedIDByGroupID(group_id);
+            let guild_id = that.getGroupSetting(group_id, 'guild_id');
             if (!guild_id) {
-                return this.tgbot.sendMessage(chat_id, '未绑定公会')
+                if (is_tg) {
+                    return linked_id ? that.tgbot.sendMessage(linked_id, '请先创建或绑定一个公会') : null;
+                } else {
+                    return that.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], group_id)
+                }
             }
-            let current_boss = this.getGuildCurrentBoss(guild_id);
+            let current_boss = that.getGuildCurrentBoss(guild_id);
             if (!current_boss) {
-                current_boss = this.setGuildCurrentBossById(guild_id, 1);
+                current_boss = that.setGuildCurrentBossById(guild_id, 1);
             }
             let reply = [];
             reply.push('进度：BOSS (' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
             reply.push('当前出刀者:\n' + (current_boss.attacker_list.length > 0 ? current_boss.attacker_list.map(a => a.name).join(', ') : '无'));
             reply.push('当前挂树者:\n' + (current_boss.tree_list.length > 0 ? current_boss.tree_list.map(a => a.name).join(', ') : '无'));
-            return this.tgbot.sendMessage(chat_id, reply.join('\n'))
-        });
-
-        this.tgbot.onText(/\/guild_boss_booking(@\w+)?(?: )?(\d+)?/, async (msg, match) => {
-            let chat_id = msg.chat.id;
-            let user_id = msg.from.id;
-            let name = (msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name;
-            let bot_name = match[1];
-            if (bot_name && bot_name !== this.botname) {
-                return;
+            if (linked_id) {
+                that.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
             }
-            let group_id = this.getGroupIDByLinkedID(chat_id);
-            let guild_id = this.getGroupSetting(group_id, 'guild_id');
+            return that.qqbot.sendGroupMessage([Plain(reply.join('\n'))], group_id);
+        }
+
+        async function guild_boss_booking(msg, match) {
+            debug(match);
+            let is_tg = !!msg.from;
+            let user_id = is_tg ? msg.from.id : msg.sender.id;
+            let user_name = is_tg ? ((msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name) : msg.sender.memberName;
+            let group_id = is_tg ? that.getGroupIDByLinkedID(msg.chat.id) : msg.sender.group.id;
+            let linked_id = is_tg ? msg.chat.id : that.getLinkedIDByGroupID(group_id);
+            let guild_id = that.getGroupSetting(group_id, 'guild_id');
             if (!guild_id) {
-                return this.tgbot.sendMessage(chat_id, '未绑定公会')
+                if (is_tg) {
+                    return linked_id ? that.tgbot.sendMessage(linked_id, '请先创建或绑定一个公会') : null;
+                } else {
+                    return that.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], group_id)
+                }
             }
-            let boss_id = match[2];
+            let boss_id = match.groups.boss_id;
             if (!boss_id) {
-                return this.tgbot.sendMessage(chat_id, '需要boss id')
+                if (is_tg) {
+                    return linked_id ? that.tgbot.sendMessage(linked_id, '需要BOSS Id') : null;
+                } else {
+                    return that.qqbot.sendGroupMessage([Plain('需要BOSS Id')], group_id)
+                }
             }
-            let boss = this.getGuildSetting(guild_id, 'boss');
+            let boss = that.getGuildSetting(guild_id, 'boss');
             if (boss[boss_id]) {
-                let result = this.updateBookingList(guild_id, this.Config.qqbot.account, name, parseInt(boss_id));
-                return this.tgbot.sendMessage(chat_id, 'BOSS(' + boss_id + ')' + (result ? '预约完毕' : '取消预约'));
+                let result = that.updateBookingList(guild_id, user_id, user_name, parseInt(boss_id), is_tg);
+                if (linked_id) {
+                    let str = 'BOSS(' + boss_id + ')' + (result ? '预约完毕' : '取消预约');
+                    if (is_tg) {
+                        str = '<a href="tg://user?id=' + user_id + '">' + user_name + '</a>' + str;
+                    }
+                    that.tgbot.sendMessage(linked_id, str, {parse_mode: 'HTML'}).catch(console.error)
+                }
+                return that.qqbot.sendGroupMessage([At(user_id), Plain('BOSS(' + boss_id + ')' + (result ? '预约完毕' : '取消预约'))], group_id)
             } else {
-                return this.tgbot.sendMessage(chat_id, 'BOSS(' + boss_id + ')不存在');
+                if (linked_id) {
+                    that.tgbot.sendMessage(linked_id, 'BOSS(' + boss_id + ')不存在').catch(console.error)
+                }
+                return that.qqbot.sendGroupMessage([Plain('BOSS(' + boss_id + ')不存在')], group_id)
             }
-        });
+        }
 
+        async function guild_boss_request(msg, match) {
+            debug(match);
+            let is_tg = !!msg.from;
+            let user_id = is_tg ? msg.from.id : msg.sender.id;
+            let user_name = is_tg ? ((msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name) : msg.sender.memberName;
+            let group_id = is_tg ? that.getGroupIDByLinkedID(msg.chat.id) : msg.sender.group.id;
+            let linked_id = is_tg ? msg.chat.id : that.getLinkedIDByGroupID(group_id);
+            let guild_id = that.getGroupSetting(group_id, 'guild_id');
+            if (!guild_id) {
+                if (is_tg) {
+                    return linked_id ? that.tgbot.sendMessage(linked_id, '请先创建或绑定一个公会') : null;
+                } else {
+                    return that.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], group_id)
+                }
+            }
+            let current_boss = that.getGuildCurrentBoss(guild_id);
+            if (current_boss) {
+                let reply = [];
+                let attacker_list = current_boss.attacker_list;
+                let tree_list = current_boss.tree_list;
+                if (attacker_list.length > 0) {
+                    reply.push('当前出刀者: \n' + attacker_list.map(a => a.name).join(', '))
+                } else {
+                    reply.push('申请成功，请出刀');
+                    reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
+                    let tree = tree_list.find(t => t.id === user_id);
+                    if (tree) {
+                        tree_list = Utils.removeArrayItem(tree_list, tree);
+                    }
+                    attacker_list.push({id: user_id, name: user_name});
+                    that.setGuildCurrentBoss(guild_id, current_boss)
+                }
+                if (linked_id) {
+                    that.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                }
+                return that.qqbot.sendGroupMessage([Plain(reply.join('\n'))], group_id)
+            }
+        }
+
+        async function guild_force_boss_request(msg, match) {
+            debug(match);
+            let is_tg = !!msg.from;
+            let user_id = is_tg ? msg.from.id : msg.sender.id;
+            let user_name = is_tg ? ((msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name) : msg.sender.memberName;
+            let group_id = is_tg ? that.getGroupIDByLinkedID(msg.chat.id) : msg.sender.group.id;
+            let linked_id = is_tg ? msg.chat.id : that.getLinkedIDByGroupID(group_id);
+            let guild_id = that.getGroupSetting(group_id, 'guild_id');
+            if (!guild_id) {
+                if (is_tg) {
+                    return linked_id ? that.tgbot.sendMessage(linked_id, '请先创建或绑定一个公会') : null;
+                } else {
+                    return that.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], group_id)
+                }
+            }
+            let current_boss = that.getGuildCurrentBoss(guild_id);
+            if (current_boss) {
+                let reply = [];
+                let attacker_list = current_boss.attacker_list;
+                let tree_list = current_boss.tree_list;
+                reply.push('申请成功，请出刀');
+                reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
+                let tree = tree_list.find(t => t.id === user_name);
+                if (tree) {
+                    tree_list = Utils.removeArrayItem(tree_list, tree);
+                }
+                if (!attacker_list.includes(a => a.id === user_id)) {
+                    attacker_list.push({id: user_id, name: user_name});
+                }
+                that.setGuildCurrentBoss(guild_id, current_boss);
+                if (linked_id) {
+                    that.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                }
+                return that.qqbot.sendGroupMessage([Plain(reply.join('\n'))], group_id)
+            }
+        }
+
+        async function guild_boss_damage(msg, match) {
+            debug(match);
+            let is_tg = !!msg.from;
+            let user_id = is_tg ? msg.from.id : msg.sender.id;
+            let user_name = is_tg ? ((msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name) : msg.sender.memberName;
+            let group_id = is_tg ? that.getGroupIDByLinkedID(msg.chat.id) : msg.sender.group.id;
+            let linked_id = is_tg ? msg.chat.id : that.getLinkedIDByGroupID(group_id);
+            let guild_id = that.getGroupSetting(group_id, 'guild_id');
+            if (!guild_id) {
+                if (is_tg) {
+                    return linked_id ? that.tgbot.sendMessage(linked_id, '请先创建或绑定一个公会') : null;
+                } else {
+                    return that.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], group_id)
+                }
+            }
+            let current_boss = that.getGuildCurrentBoss(guild_id);
+            if (current_boss) {
+                let reply = [];
+                let attacker_list = current_boss.attacker_list;
+                let tree_list = current_boss.tree_list;
+                let attacker = attacker_list.find(a => a.id === user_id);
+                if (!attacker) {
+                    if (is_tg) {
+                        return linked_id ? that.tgbot.sendMessage(linked_id, '请先申请出刀') : null;
+                    } else {
+                        return that.qqbot.sendGroupMessage([Plain('请先申请出刀')], guild_id)
+                    }
+                } else {
+                    attacker_list = Utils.removeArrayItem(attacker_list, attacker);
+                    let hp = match.groups.hp;
+                    let unit = match.groups.unit;
+                    if (!hp) {
+                        if (is_tg) {
+                            return linked_id ? that.tgbot.sendMessage(linked_id, '需要HP') : null;
+                        } else {
+                            return that.qqbot.sendGroupMessage([Plain('需要HP')], group_id)
+                        }
+                    }
+                    if (unit) {
+                        hp = hp * 10000;
+                    }
+                    current_boss.hp = current_boss.hp - hp;
+                    if (current_boss.hp > 0) {
+                        that.setGuildCurrentBoss(guild_id, current_boss);
+                        if (linked_id) {
+                            that.tgbot.sendMessage(linked_id, '进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp).catch(console.error)
+                        }
+                        return this.qqbot.sendGroupMessage([Plain('进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp)], group_id)
+                    } else {
+                        // 打屎了
+                        let next_id = current_boss.id + 1;//, round = parseInt(next_id / 5) + 1;
+                        next_id >= 6 ? next_id = 1 : next_id;
+                        let booking_list = that.getGuildSetting(guild_id, 'booking_list');
+                        reply.push(Plain('当前BOSS已死，可下树玩家：\n'));
+                        tree_list.map(t => reply.push(t));
+                        current_boss = that.setGuildCurrentBossById(guild_id, next_id);
+                        reply.push(Plain('\nBOSS(' + current_boss.id + ') MaxHP: ' + current_boss.max_hp + ' 已开启，预订提醒：\n'));
+                        for (let book of booking_list) {
+                            if (book.boss_id === next_id) {
+                                reply.push(book);
+                                let index = booking_list.indexOf(book);
+                                delete booking_list[index];
+                            }
+                        }
+                        that.setGuildSetting(guild_id, 'booking_list', booking_list.filter(b => !!b));
+                        if (linked_id) {
+                            let r = reply.map(r => r.text ||
+                                (r.hasOwnProperty('is_tg') && (r.is_tg ? '<a href="tg://user?id=' + r.id + '">' + r.name + '</a> ' : r.name))
+                            );
+                            that.tgbot.sendMessage(linked_id, r.join(''), {parse_mode: 'HTML'}).catch(console.error)
+                        }
+                        reply = reply.map(r => r.hasOwnProperty('is_tg') ? (r.is_tg ? Plain(r.name) : At(r.id)) : r);
+                        return that.qqbot.sendGroupMessage(reply, group_id);
+                    }
+                }
+            }
+        }
+
+        async function guild_boss_up_the_tree(msg, match) {
+            debug(match);
+            let is_tg = !!msg.from;
+            let user_id = is_tg ? msg.from.id : msg.sender.id;
+            let user_name = is_tg ? ((msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name) : msg.sender.memberName;
+            let group_id = is_tg ? that.getGroupIDByLinkedID(msg.chat.id) : msg.sender.group.id;
+            let linked_id = is_tg ? msg.chat.id : that.getLinkedIDByGroupID(group_id);
+            let guild_id = that.getGroupSetting(group_id, 'guild_id');
+            if (!guild_id) {
+                if (is_tg) {
+                    return linked_id ? that.tgbot.sendMessage(linked_id, '请先创建或绑定一个公会') : null;
+                } else {
+                    return that.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], group_id)
+                }
+            }
+            let current_boss = that.getGuildCurrentBoss(guild_id);
+            if (current_boss) {
+                let reply = [];
+                let attacker_list = current_boss.attacker_list;
+                let tree_list = current_boss.tree_list;
+                let attacker = attacker_list.find(a => a.id === user_id);
+                if (attacker) {
+                    attacker_list = Utils.removeArrayItem(attacker_list, attacker)
+                }
+                let tree = tree_list.find(t => t.id === user_id);
+                if (tree && !attacker) {
+                    tree_list = Utils.removeArrayItem(tree_list, tree);
+                    reply.push('已经在树上了')
+                } else {
+                    if (!attacker) {
+                        if (is_tg) {
+                            return linked_id ? that.tgbot.sendMessage(linked_id, '未申请出刀') : null;
+                        } else {
+                            return that.qqbot.sendGroupMessage([Plain('未申请出刀')], group_id)
+                        }
+                    }
+                    tree_list.push({id: user_id, name: user_name, is_tg});
+                    reply.push('申请挂树成功')
+                }
+                that.setGuildCurrentBoss(guild_id, current_boss);
+                if (linked_id) {
+                    that.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                }
+                return that.qqbot.sendGroupMessage([Plain(reply.join('\n'))], group_id)
+            }
+        }
 
     }
 
@@ -423,12 +464,12 @@ class PCRGuild extends Plugin {
         return {guild_id, guild_name}
     }
 
-    updateBookingList(guild_id, id, name, boss_id) {
+    updateBookingList(guild_id, id, name, boss_id, is_tg = false) {
         let result;
         let booking_list = this.getGuildSetting(guild_id, 'booking_list') || [];
         let book = booking_list.find(b => !!b && b.id === id && b.boss_id === boss_id);
         if (!book) {
-            booking_list.push({id, name, boss_id});
+            booking_list.push({id, name, boss_id, is_tg});
             result = true
         } else {
             booking_list = Utils.removeArrayItem(booking_list, book);
@@ -444,7 +485,12 @@ class PCRGuild extends Plugin {
         for (let i = 0; i < boss.length; i++) {
             let b = boss[i];
             if (b !== 'x') {
-                b = parseInt(b);
+                if (b.includes('w')) {
+                    b = parseInt(b);
+                    b *= 10000;
+                } else {
+                    b = parseInt(b);
+                }
                 new_boss_list[i] = b;
             } else {
                 new_boss_list[i] = old_boss_list[i] || 0;
