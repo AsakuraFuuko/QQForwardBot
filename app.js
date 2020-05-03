@@ -10,7 +10,7 @@ const PluginQQForward = require('./plugins/qqforward');
 // const PluginKanColleTime = require('./plugins/kancolletime');
 // const PluginOther = require('./plugins/other');
 
-const PluginPCRGacha = require('./plugins/pcr/gacha');
+// const PluginPCRGacha = require('./plugins/pcr/gacha');
 const PluginPCRGuild = require('./plugins/pcr/guild');
 
 const tgbot = new TelegramBot(Config.tgbot.token, {polling: true});
@@ -84,7 +84,7 @@ qqbot.onSignal('verified', async () => {
 // new PluginKanColleTime({tgbot, Config, qqbot});
 // new PluginOther({tgbot, Config, qqbot});
 
-new PluginPCRGacha({tgbot, Config, qqbot, botname});
+// new PluginPCRGacha({tgbot, Config, qqbot, botname});
 new PluginPCRGuild({tgbot, Config, qqbot, botname});
 
 new PluginQQForward({tgbot, Config, qqbot, botname});
