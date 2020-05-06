@@ -14,10 +14,10 @@ class PCRGuild extends Plugin {
         super(params);
         touch(configpath);
         this.menu = [
-            '可用公会战指令：\n', 'BOSS战况\n', 'BOSS预约 编号\n', 'BOSS申请出刀\n', 'BOSS强制出刀\n', 'BOSS报刀 伤害\n', 'BOSS挂树\n\n'
+            '可用公会战指令：\n', 'BOSS战况\n', 'BOSS预约 编号\n', 'BOSS申请出刀\n', 'BOSS强制出刀\n', 'BOSS报刀 伤害\n', 'BOSS挂树'
         ];
         this.opmenu = [
-            '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', 'BOSS列表\n', '设置当前BOSS\n', '更新BOSS 123 x 123 x 123 (x为不更新)\n'
+            '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', 'BOSS列表\n', '设置当前BOSS\n', '更新BOSS 123 x 123 x 123 (x为不更新)'
         ]
     }
 
@@ -256,12 +256,19 @@ class PCRGuild extends Plugin {
             }
             let current_boss = that.getGuildCurrentBoss(guild_id);
             if (current_boss) {
-                let reply = [];
+                let reply = [], at_qq = '', at_tg = '';
                 let attacker_list = current_boss.attacker_list;
                 let tree_list = current_boss.tree_list;
                 if (attacker_list.length > 0) {
                     reply.push('当前出刀者: \n' + attacker_list.map(a => a.name).join(', '))
                 } else {
+                    if (is_tg) {
+                        at_tg = '<a href="tg://user?id=' + user_id + '">' + user_name + '</a>';
+                        at_qq = Plain(user_name)
+                    } else {
+                        at_tg = user_name;
+                        at_qq = At(user_id)
+                    }
                     reply.push('申请成功，请出刀');
                     reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
                     let tree = tree_list.find(t => t.id === user_id);
@@ -272,9 +279,9 @@ class PCRGuild extends Plugin {
                     that.setGuildCurrentBoss(guild_id, current_boss)
                 }
                 if (linked_id) {
-                    that.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                    that.tgbot.sendMessage(linked_id, at_tg + ' ' + reply.join('\n'), {parse_mode: 'HTML'}).catch(console.error)
                 }
-                return that.qqbot.sendGroupMessage([Plain(reply.join('\n'))], group_id)
+                return that.qqbot.sendGroupMessage([at_qq, Plain(reply.join('\n'))], group_id)
             }
         }
 
@@ -295,9 +302,16 @@ class PCRGuild extends Plugin {
             }
             let current_boss = that.getGuildCurrentBoss(guild_id);
             if (current_boss) {
-                let reply = [];
+                let reply = [], at_qq = '', at_tg = '';
                 let attacker_list = current_boss.attacker_list;
                 let tree_list = current_boss.tree_list;
+                if (is_tg) {
+                    at_tg = '<a href="tg://user?id=' + user_id + '">' + user_name + '</a>';
+                    at_qq = Plain(user_name)
+                } else {
+                    at_tg = user_name;
+                    at_qq = At(user_id)
+                }
                 reply.push('申请成功，请出刀');
                 reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
                 let tree = tree_list.find(t => t.id === user_name);
@@ -309,9 +323,9 @@ class PCRGuild extends Plugin {
                 }
                 that.setGuildCurrentBoss(guild_id, current_boss);
                 if (linked_id) {
-                    that.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                    that.tgbot.sendMessage(linked_id, at_tg + ' ' + reply.join('\n'), {parse_mode: 'HTML'}).catch(console.error)
                 }
-                return that.qqbot.sendGroupMessage([Plain(reply.join('\n'))], group_id)
+                return that.qqbot.sendGroupMessage([at_qq, Plain(reply.join('\n'))], group_id)
             }
         }
 
@@ -356,13 +370,21 @@ class PCRGuild extends Plugin {
                     if (unit) {
                         hp = hp * 10000;
                     }
+                    let at_qq = '', at_tg = '';
+                    if (is_tg) {
+                        at_tg = '<a href="tg://user?id=' + user_id + '">' + user_name + '</a>';
+                        at_qq = Plain(user_name)
+                    } else {
+                        at_tg = user_name;
+                        at_qq = At(user_id)
+                    }
                     current_boss.hp = current_boss.hp - hp;
                     if (current_boss.hp > 0) {
                         that.setGuildCurrentBoss(guild_id, current_boss);
                         if (linked_id) {
-                            that.tgbot.sendMessage(linked_id, '进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp).catch(console.error)
+                            that.tgbot.sendMessage(linked_id, at_tg + ' 进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp).catch(console.error)
                         }
-                        return this.qqbot.sendGroupMessage([Plain('进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp)], group_id)
+                        return that.qqbot.sendGroupMessage([at_qq, Plain('进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp)], group_id)
                     } else {
                         // 打屎了
                         let next_id = current_boss.id + 1;//, round = parseInt(next_id / 5) + 1;
@@ -384,9 +406,10 @@ class PCRGuild extends Plugin {
                             let r = reply.map(r => r.text ||
                                 (r.hasOwnProperty('is_tg') && (r.is_tg ? '<a href="tg://user?id=' + r.id + '">' + r.name + '</a> ' : r.name))
                             );
-                            that.tgbot.sendMessage(linked_id, r.join(''), {parse_mode: 'HTML'}).catch(console.error)
+                            that.tgbot.sendMessage(linked_id, at_tg + ' ' + r.join(''), {parse_mode: 'HTML'}).catch(console.error)
                         }
                         reply = reply.map(r => r.hasOwnProperty('is_tg') ? (r.is_tg ? Plain(r.name) : At(r.id)) : r);
+                        reply = reply.splice(0, 0, at_qq);
                         return that.qqbot.sendGroupMessage(reply, group_id);
                     }
                 }
@@ -418,6 +441,14 @@ class PCRGuild extends Plugin {
                     attacker_list = Utils.removeArrayItem(attacker_list, attacker)
                 }
                 let tree = tree_list.find(t => t.id === user_id);
+                let at_qq = '', at_tg = '';
+                if (is_tg) {
+                    at_tg = '<a href="tg://user?id=' + user_id + '">' + user_name + '</a>';
+                    at_qq = Plain(user_name)
+                } else {
+                    at_tg = user_name;
+                    at_qq = At(user_id)
+                }
                 if (tree && !attacker) {
                     tree_list = Utils.removeArrayItem(tree_list, tree);
                     reply.push('已经在树上了')
@@ -434,9 +465,9 @@ class PCRGuild extends Plugin {
                 }
                 that.setGuildCurrentBoss(guild_id, current_boss);
                 if (linked_id) {
-                    that.tgbot.sendMessage(linked_id, reply.join('\n')).catch(console.error)
+                    that.tgbot.sendMessage(linked_id, at_tg + ' ' + reply.join('\n')).catch(console.error)
                 }
-                return that.qqbot.sendGroupMessage([Plain(reply.join('\n'))], group_id)
+                return that.qqbot.sendGroupMessage([at_qq, Plain(reply.join('\n'))], group_id)
             }
         }
 
