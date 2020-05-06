@@ -423,7 +423,7 @@ class PCRGuild extends Plugin {
                             that.tgbot.sendMessage(linked_id, at_tg + ' ' + r.join(''), {parse_mode: 'HTML'}).catch(console.error)
                         }
                         reply = reply.map(r => r.hasOwnProperty('is_tg') ? (r.is_tg ? Plain(r.name) : At(r.id)) : r);
-                        reply = reply.splice(0, 0, at_qq);
+                        reply.splice(0, 0, at_qq);
                         return that.qqbot.sendGroupMessage(reply, group_id);
                     }
                 }
