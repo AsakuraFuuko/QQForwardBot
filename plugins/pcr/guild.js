@@ -630,7 +630,7 @@ class PCRGuild extends Plugin {
         let now = new Date();
         let dateString = moment(now).format('YYYY-MM-DD');
         let timeString = moment(now).format('YYYY-MM-DD hh:mm:ss');
-        fs.appendFileSync('./logs/pcr/' + dateString + '.txt', timeString + ' - ' + msg)
+        fs.appendFileSync('./logs/pcr/' + dateString + '.txt', timeString + ' - ' + msg + '\n')
     }
 }
 
