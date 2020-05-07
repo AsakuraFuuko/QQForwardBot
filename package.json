@@ -19,6 +19,7 @@
   },
   "main": "app.js",
   "dependencies": {
+    "better-sqlite3": "^7.0.1",
     "cheerio": "^1.0.0-rc.2",
     "cwebp": "^2.0.1",
     "debug": "^4.1.1",
@@ -28,6 +29,7 @@
     "js-yaml": "^3.13.1",
     "log": "^3.2.0",
     "md5": "^2.2.1",
+    "moment": "^2.25.3",
     "music-api": "^0.3.11",
     "node-cron": "^2.0.3",
     "node-ffprobe": "^3.0.0",

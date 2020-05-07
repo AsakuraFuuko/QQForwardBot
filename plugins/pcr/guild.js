@@ -2,6 +2,7 @@ const debug = require('debug')('plugin_pcr_guild');
 const fs = require('fs');
 const Path = require('path');
 const touch = require("touch");
+const moment = require('moment');
 const Mirai = require('node-mirai-sdk');
 const {Plain, At} = Mirai.MessageComponent;
 const Plugin = require('../plugin');
@@ -239,6 +240,7 @@ class PCRGuild extends Plugin {
             let boss = that.getGuildSetting(guild_id, 'boss');
             if (boss[boss_id]) {
                 let result = that.updateBookingList(guild_id, user_id, user_name, parseInt(boss_id), is_tg);
+                that.log(`预约 - ${user_name} - ${user_id} - BOSS:${boss_id} ${(result ? '预约完毕' : '取消预约')}`);
                 if (linked_id) {
                     that.tgbot.sendMessage(linked_id, at_tg + ' ' + 'BOSS(' + boss_id + ')' + (result ? '预约完毕' : '取消预约'), {parse_mode: 'HTML'}).catch(console.error)
                 }
@@ -282,6 +284,7 @@ class PCRGuild extends Plugin {
                 if (attacker_list.length > 0) {
                     reply.push('当前出刀者: \n' + attacker_list.map(a => a.name).join(', '))
                 } else {
+                    that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 申请成功`);
                     reply.push('申请成功，请出刀');
                     reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
                     let tree = tree_list.find(t => t.id === user_id);
@@ -326,6 +329,7 @@ class PCRGuild extends Plugin {
                 let reply = [];
                 let attacker_list = current_boss.attacker_list;
                 let tree_list = current_boss.tree_list;
+                that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 强制申请成功`);
                 reply.push('申请成功，请出刀');
                 reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
                 let tree = tree_list.find(t => t.id === user_name);
@@ -392,6 +396,7 @@ class PCRGuild extends Plugin {
                     if (unit) {
                         hp = hp * 10000;
                     }
+                    that.log(`出刀 - ${user_name} - ${user_id} - BOSS:${current_boss.id} ${hp} (${current_boss.hp}/${current_boss.max_hp})`);
                     current_boss.hp = current_boss.hp - hp;
                     if (current_boss.hp > 0) {
                         that.setGuildCurrentBoss(guild_id, current_boss);
@@ -401,6 +406,7 @@ class PCRGuild extends Plugin {
                         return that.qqbot.sendGroupMessage([at_qq, Plain('进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp)], group_id)
                     } else {
                         // 打屎了
+                        that.log(`出刀 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 已死`);
                         let next_id = current_boss.id + 1;//, round = parseInt(next_id / 5) + 1;
                         next_id >= 6 ? next_id = 1 : next_id;
                         let booking_list = that.getGuildSetting(guild_id, 'booking_list');
@@ -474,6 +480,7 @@ class PCRGuild extends Plugin {
                             return that.qqbot.sendGroupMessage([at_qq, Plain('未申请出刀')], group_id)
                         }
                     }
+                    that.log(`挂树 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 挂树成功`);
                     tree_list.push({id: user_id, name: user_name, is_tg});
                     reply.push('申请挂树成功')
                 }
@@ -590,6 +597,13 @@ class PCRGuild extends Plugin {
             guilds.push(obj)
         }
         fs.writeFileSync(configpath, JSON.stringify(guilds))
+    }
+
+    log(msg) {
+        let now = new Date();
+        let dateString = moment(now).format('YYYY-MM-DD');
+        let timeString = moment(now).format('YYYY-MM-DD hh:mm:ss');
+        fs.writeFileSync('./logs/pcr/' + dateString + '.txt', timeString + ' - ' + msg, 'w+')
     }
 }
 

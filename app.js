@@ -12,6 +12,7 @@ const PluginQQForward = require('./plugins/qqforward');
 
 // const PluginPCRGacha = require('./plugins/pcr/gacha');
 const PluginPCRGuild = require('./plugins/pcr/guild');
+const PluginPCRTools = require('./plugins/pcr/tools');
 
 const tgbot = new TelegramBot(Config.tgbot.token, {polling: true});
 
@@ -86,6 +87,7 @@ qqbot.onSignal('verified', async () => {
 
 // new PluginPCRGacha({tgbot, Config, qqbot, botname});
 new PluginPCRGuild({tgbot, Config, qqbot, botname});
+new PluginPCRTools({tgbot, Config, qqbot, botname});
 
 new PluginQQForward({tgbot, Config, qqbot, botname});
 qqbot.listen('all');
