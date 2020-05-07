@@ -1,7 +1,6 @@
 const debug = require('debug')('plugin_pcr_tools');
 const fs = require('fs');
 const Path = require('path');
-const Images = require("images");
 const Mirai = require('node-mirai-sdk');
 const {Image} = Mirai.MessageComponent;
 const Plugin = require('../plugin');
