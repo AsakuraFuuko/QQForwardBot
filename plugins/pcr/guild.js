@@ -424,7 +424,7 @@ class PCRGuild extends Plugin {
                     if (current_boss.hp > 0) {
                         that.setGuildCurrentBoss(guild_id, current_boss);
                         if (linked_id) {
-                            that.tgbot.sendMessage(linked_id, at_tg + ' 进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp).catch(console.error)
+                            that.tgbot.sendMessage(linked_id, at_tg + ' 进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp, {parse_mode: 'HTML'}).catch(console.error)
                         }
                         return that.qqbot.sendGroupMessage([at_qq, Plain('进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp)], group_id)
                     } else {
