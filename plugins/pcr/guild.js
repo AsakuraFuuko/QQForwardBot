@@ -419,7 +419,7 @@ class PCRGuild extends Plugin {
                     if (unit) {
                         hp = hp * 10000;
                     }
-                    that.log(`出刀 - ${user_name} - ${user_id} - BOSS:${current_boss.id} ${hp} (${current_boss.hp}/${current_boss.max_hp})`);
+                    that.log(`出刀 - ${user_name} - ${user_id} - BOSS:${current_boss.id} dmg:${hp} (${current_boss.hp}/${current_boss.max_hp})`);
                     current_boss.hp = current_boss.hp - hp;
                     if (current_boss.hp > 0) {
                         that.setGuildCurrentBoss(guild_id, current_boss);
