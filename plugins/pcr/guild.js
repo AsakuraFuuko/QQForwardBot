@@ -139,7 +139,7 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/^更新当前(?:BOSS|boss)(?: )?HP(?: )?(?<boss_hp>\d+)?/, message, async (msg, match) => {
+                Plugin.onText(/^更新当前(?:BOSS|boss)(?: )?(?:HP|hp)(?: )?(?<boss_hp>\d+)?/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -403,7 +403,7 @@ class PCRGuild extends Plugin {
                     if (is_tg) {
                         return linked_id ? that.tgbot.sendMessage(linked_id, at_tg + ' ' + '请先申请出刀', {parse_mode: 'HTML'}) : null;
                     } else {
-                        return that.qqbot.sendGroupMessage([at_qq, Plain('请先申请出刀')], guild_id)
+                        return that.qqbot.sendGroupMessage([at_qq, Plain('请先申请出刀')], group_id)
                     }
                 } else {
                     attacker_list = Utils.removeArrayItem(attacker_list, attacker);
