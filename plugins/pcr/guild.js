@@ -305,7 +305,7 @@ class PCRGuild extends Plugin {
                 let attacker_list = current_boss.attacker_list;
                 let tree_list = current_boss.tree_list;
                 if (attacker_list.length > 0) {
-                    reply.push('当前出刀者: \n' + attacker_list.map(a => a.name).join(', '))
+                    reply.push('申请失败，请勿出刀。当前出刀中的玩家: \n' + attacker_list.map(a => a.name).join(', '))
                 } else {
                     that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 申请成功`);
                     reply.push('申请成功，请出刀');
