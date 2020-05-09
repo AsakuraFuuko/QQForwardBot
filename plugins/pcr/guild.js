@@ -261,7 +261,7 @@ class PCRGuild extends Plugin {
                 }
             }
             let boss = that.getGuildSetting(guild_id, 'boss');
-            if (boss[boss_id]) {
+            if (boss[parseInt(boss_id) - 1]) {
                 let result = that.updateBookingList(guild_id, user_id, user_name, parseInt(boss_id), is_tg);
                 that.log(`预约 - ${user_name} - ${user_id} - BOSS:${boss_id} ${(result ? '预约完毕' : '取消预约')}`);
                 if (linked_id) {
