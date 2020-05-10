@@ -171,7 +171,7 @@ class QQForward extends Plugin {
                     if (is_private) {
                         this.qqbot.sendFriendMessage(msg_no_nick, chat_id)
                     } else {
-                        this.qqbot.sendGroupMessage(this.getUserShowNickName(group_id, user_id) ? msg_no_nick : msg_nick, chat_id)
+                        this.qqbot.sendGroupMessage(this.getUserShowNickName(group_id, user_id) ? msg_nick : msg_no_nick, chat_id)
                     }
                 }
             }
