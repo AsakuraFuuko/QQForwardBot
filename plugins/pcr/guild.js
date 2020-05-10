@@ -16,7 +16,7 @@ class PCRGuild extends Plugin {
         touch(configpath);
         this.menu = [
             '可用公会战指令：\n', 'BOSS战况 (缩写: !战况)\n', 'BOSS预约 编号 (缩写: !预约 编号)\n',
-            'BOSS申请出刀 (缩写: !申请)\n', 'BOSS强制出刀 (缩写: !强制)\n', 'BOSS报刀 伤害 (缩写: !报刀 伤害)\n', 'BOSS挂树 (缩写: !挂树)'
+            'BOSS申请出刀 (缩写: !申请)\n', 'BOSS取消出刀 (缩写: !取消)\n', 'BOSS强制出刀 (缩写: !强制)\n', 'BOSS报刀 伤害 (缩写: !报刀 伤害)\n', 'BOSS挂树 (缩写: !挂树)'
         ];
         this.opmenu = [
             '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', 'BOSS列表\n', '设置当前BOSS\n',
@@ -58,9 +58,11 @@ class PCRGuild extends Plugin {
 
                 Plugin.onText(/(?:BOSS|boss|^[!|！])申请(?:出刀)?/, message, guild_boss_request);
 
+                Plugin.onText(/(?:BOSS|boss|^[!|！])取消(?:出刀)?/, message, guild_boss_cancel_request);
+
                 Plugin.onText(/(?:BOSS|boss|^[!|！])强制(?:出刀)?/, message, guild_force_boss_request);
 
-                Plugin.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>w|W|万)?/, message, guild_boss_damage);
+                Plugin.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>[wW万])?/, message, guild_boss_damage);
 
                 Plugin.onText(/(?:BOSS|boss|^[!|！])挂树/, message, guild_boss_up_the_tree);
 
@@ -188,8 +190,9 @@ class PCRGuild extends Plugin {
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])战况/, guild_boss_status);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])预约(?: )?(?<boss_id>\d+)?/, guild_boss_booking);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])申请(?:出刀)?/, guild_boss_request);
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])取消(?:出刀)?/, guild_boss_cancel_request);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])强制出刀/, guild_force_boss_request);
-        this.tgbot.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>w|W|万)?/, guild_boss_damage);
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>[wW万])?/, guild_boss_damage);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])挂树/, guild_boss_up_the_tree);
 
         async function guild_boss_status(msg, match) {
@@ -321,6 +324,51 @@ class PCRGuild extends Plugin {
                     that.tgbot.sendMessage(linked_id, at_tg + ' ' + reply.join('\n'), {parse_mode: 'HTML'}).catch(console.error)
                 }
                 return that.qqbot.sendGroupMessage([at_qq, Plain(reply.join('\n'))], group_id)
+            }
+        }
+
+        async function guild_boss_cancel_request(msg, match) {
+            debug(match);
+            let is_tg = !!msg.from;
+            let user_id = is_tg ? msg.from.id : msg.sender.id;
+            let user_name = is_tg ? ((msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name) : msg.sender.memberName;
+            let group_id = is_tg ? that.getGroupIDByLinkedID(msg.chat.id) : msg.sender.group.id;
+            let linked_id = is_tg ? msg.chat.id : that.getLinkedIDByGroupID(group_id);
+            let at_qq = '', at_tg = '';
+            if (is_tg) {
+                at_tg = '<a href="tg://user?id=' + user_id + '">' + user_name + '</a>';
+                at_qq = Plain(user_name)
+            } else {
+                at_tg = user_name;
+                at_qq = At(user_id)
+            }
+            let guild_id = that.getGroupSetting(group_id, 'guild_id');
+            if (!guild_id) {
+                if (is_tg) {
+                    return linked_id ? that.tgbot.sendMessage(linked_id, '请先创建或绑定一个公会', {parse_mode: 'HTML'}) : null;
+                } else {
+                    return that.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], group_id)
+                }
+            }
+            let current_boss = that.getGuildCurrentBoss(guild_id);
+            if (current_boss) {
+                let attacker_list = current_boss.attacker_list;
+                let tree_list = current_boss.tree_list;
+                let attacker = attacker_list.find(a => a.id === user_id);
+                if (!attacker) {
+                    if (is_tg) {
+                        return linked_id ? that.tgbot.sendMessage(linked_id, at_tg + ' ' + '未申请出刀', {parse_mode: 'HTML'}) : null;
+                    } else {
+                        return that.qqbot.sendGroupMessage([at_qq, Plain('未申请出刀')], group_id)
+                    }
+                } else {
+                    attacker_list = Utils.removeArrayItem(attacker_list, attacker);
+                    that.setGuildCurrentBoss(guild_id, current_boss);
+                }
+                if (linked_id) {
+                    that.tgbot.sendMessage(linked_id, at_tg + ' ' + '已取消申请', {parse_mode: 'HTML'}).catch(console.error)
+                }
+                return that.qqbot.sendGroupMessage([at_qq, Plain('已取消申请')], group_id)
             }
         }
 
