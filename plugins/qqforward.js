@@ -118,7 +118,6 @@ class QQForward extends Plugin {
             let user_id = msg.from.id;
             let tg_chat_id = msg.chat.id;
             let msg_type = msg.chat.type;
-            if (msg_type !== 'private' && this.getUserMute(tg_chat_id, user_id)) return; //Mute
             let is_command = msg.entities && msg.entities.filter((entry) => entry.offset === 0 && entry.type === 'bot_command').length > 0;
             if (!is_command) {
                 let name = (msg.from.last_name ? msg.from.last_name : '') + msg.from.first_name;
@@ -139,7 +138,7 @@ class QQForward extends Plugin {
                         is_private = true;
                     }
                 }
-
+                if (!is_private && this.getUserMute(group_id, user_id)) return; //Mute
                 if (msg.sticker || msg.photo || msg.document) {
                     let caption = msg.caption || '';//(msg.reply_to_message && msg.reply_to_message.caption) || '';
                     let is_sticker = !!msg.sticker, is_giforvideo = false;
@@ -172,7 +171,7 @@ class QQForward extends Plugin {
                     if (is_private) {
                         this.qqbot.sendFriendMessage(msg_no_nick, chat_id)
                     } else {
-                        this.qqbot.sendGroupMessage(this.getUserShowNickName(tg_chat_id, user_id) ? msg_no_nick : msg_nick, chat_id)
+                        this.qqbot.sendGroupMessage(this.getUserShowNickName(group_id, user_id) ? msg_no_nick : msg_nick, chat_id)
                     }
                 }
             }
@@ -373,7 +372,7 @@ class QQForward extends Plugin {
 
     setUserSettingByGroup(group_id, user_id, key, value) {
         let users = this.getGroupSetting(group_id, 'users') || [];
-        let user = users.find(a => a.group_id.toString() === group_id.toString() && a.user_id.toString() === user_id.toString());
+        let user = users.find(a => a.user_id.toString() === user_id.toString());
         if (!!user) {
             debug('已存在，替换');
             let index = users.indexOf(user);
