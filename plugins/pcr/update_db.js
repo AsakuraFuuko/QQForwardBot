@@ -1,34 +1,32 @@
-const server = 'cn';
-const version_url = 'https://redive.estertion.win/last_version_' + server + '.json';
-const db_url = 'https://redive.estertion.win/db/redive_' + server + '.db.br';
-
 const zlib = require('zlib');
 const fs = require('fs');
 const requestPromise = require('request-promise');
 
-(async () => {
-    let last_version_cn = await requestPromise.get(version_url);
-    if (last_version_cn) {
-        last_version_cn = JSON.parse(last_version_cn);
-        let version_cn;
+async function update(server) {
+    const version_url = 'https://redive.estertion.win/last_version_' + server + '.json';
+    let last_version = await requestPromise.get(version_url);
+    if (last_version) {
+        last_version = JSON.parse(last_version);
+        let version;
         try {
-            version_cn = JSON.parse(fs.readFileSync('./db/last_version_' + server + '.json').toString());
+            version = JSON.parse(fs.readFileSync('./db/last_version_' + server + '.json').toString());
         } catch (e) {
             console.error(e)
         }
-        if (version_cn && last_version_cn.TruthVersion <= version_cn.TruthVersion) {
+        if (version && last_version.TruthVersion <= version.TruthVersion) {
             return;
         }
     } else {
         return;
     }
-    if (await download_db()) {
-        console.log('update db');
-        fs.writeFileSync('./db/last_version_' + server + '.json', JSON.stringify(last_version_cn));
+    if (await download_db(server)) {
+        console.log('update ' + server + ' db');
+        fs.writeFileSync('./db/last_version_' + server + '.json', JSON.stringify(last_version));
     }
-})();
+}
 
-async function download_db() {
+async function download_db(server) {
+    const db_url = 'https://redive.estertion.win/db/redive_' + server + '.db.br';
     let db = await requestPromise.get({uri: db_url, encoding: null});
     if (db) {
         let decompress = zlib.brotliDecompressSync(db);
@@ -37,3 +35,10 @@ async function download_db() {
     }
     return false;
 }
+
+(async () => {
+    await update('cn');
+    await update('jp');
+    await update('tw');
+})();
+
