@@ -99,7 +99,7 @@ class QQForward extends Plugin {
 
             async function sendPhoto(options) {
                 return requestPromise.get(options).then((data) => {
-                    let type = fileType(data);
+                    let type = fileType.fromBuffer(data);
                     return {data, type: type.ext, filename: Utils.getRandomString() + '.' + type.ext, mime: type.mime}
                 }).catch((e) => {
                     if (retry > 5) {

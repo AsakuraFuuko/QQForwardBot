@@ -23,6 +23,7 @@ const requestPromise = require('request-promise');
         return;
     }
     if (await download_db()) {
+        console.log('update db');
         fs.writeFileSync('./db/last_version_' + server + '.json', JSON.stringify(last_version_cn));
     }
 })();

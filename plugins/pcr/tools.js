@@ -10,7 +10,7 @@ const DBHelper = require('../pcr/lib/dbhelper');
 class PCRTools extends Plugin {
     constructor(params) {
         super(params);
-        this.pool = require('./pool_cn').pool;
+        this.pool = require('./pool_template_cn').pool;
     }
 
     init() {
