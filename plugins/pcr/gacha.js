@@ -3,7 +3,7 @@ const fs = require('fs');
 const Path = require('path');
 const gm = require('gm');
 const Mirai = require('node-mirai-sdk');
-const {Image} = Mirai.MessageComponent;
+const {Image, Plain} = Mirai.MessageComponent;
 const Plugin = require('../plugin');
 const Utils = require('../../lib/utils');
 
@@ -33,7 +33,9 @@ class PCRGacha extends Plugin {
                 let path = './download/pcr/' + Utils.getRandomString() + '.png';
                 await this.makePhoto(result, path);
                 this.qqbot.uploadImage(path, {type: msg_type}).then((img) => {
-                    return this.qqbot[msg_type === 'GroupMessage' ? 'sendGroupMessage' : 'sendFriendMessage']([Image(img)], chat_id)
+                    return this.qqbot[msg_type === 'GroupMessage' ? 'sendGroupMessage' : 'sendFriendMessage']([Image(img)], chat_id).then(msg => {
+                        return this.qqbot[msg_type === 'GroupMessage' ? 'sendGroupMessage' : 'sendFriendMessage']([Plain(result.map(r => r.prefix + r.chapter[this.site + '_name']).join(','))], chat_id)
+                    })
                 }).finally(() => {
                     fs.unlink(path, (err) => {
                         if (err) {
@@ -57,7 +59,9 @@ class PCRGacha extends Plugin {
             let result = this.getGacha();
             let path = './download/pcr/' + Utils.getRandomString() + '.png';
             await this.makePhoto(result, path);
-            return this.tgbot.sendPhoto(chat_id, path).finally(() => {
+            return this.tgbot.sendPhoto(chat_id, path, {
+                caption: result.map(r => r.prefix + r.chapter[this.site + '_name']).join(',')
+            }).finally(() => {
                 fs.unlink(path, (err) => {
                     if (err) {
                         console.error(err)
