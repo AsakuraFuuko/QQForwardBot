@@ -101,12 +101,13 @@ class QQForward extends Plugin {
                 return requestPromise.get(options).then(async (data) => {
                     let type = await fileType.fromBuffer(data);
                     return {data, type: type.ext, filename: Utils.getRandomString() + '.' + type.ext, mime: type.mime}
-                }).catch((e) => {
+                }).catch(async (e) => {
                     if (retry > 5) {
                         console.error(e);
                         return that.tgbot.sendMessage(chat_id, '发送失败~')
                     } else {
                         retry += 1;
+                        await Utils.sleep(1000);
                         return sendPhoto(options)
                     }
                 })
