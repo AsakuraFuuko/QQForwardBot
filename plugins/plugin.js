@@ -64,7 +64,9 @@ class Plugin {
                         msg += `<a href="${tag.url}">[图片]</a>`;
                         break;
                     case 'Plain':
-                        msg += tag.text;
+                        if (!tag.text.match(/\[\[(?:.*)](?:.*)]请使用最新版本手机QQ查看/)) {
+                            msg += tag.text;
+                        }
                         break;
                     case 'At':
                         msg += tag.display.replace('@', '🌀');
@@ -79,11 +81,11 @@ class Plugin {
                         let content = tag.content;
                         debug(content);
                         content = JSON.parse(content);
-                        if (content.view !== 'music') {
-                            let detail_1 = content.meta.detail_1;
-                            val = `<a href="${detail_1.qqdocurl}">${detail_1.desc}</a>`;
-                            msg += val;
-                        }
+                        // if (content.view !== 'music') {
+                        let detail_1 = content.meta.detail_1 || content.meta.news || content.meta.music;
+                        val = `<a href="${detail_1.qqdocurl || detail_1.jumpUrl}">${detail_1.desc || detail_1.title}</a>`;
+                        msg += val;
+                        // }
                         break;
                     // case 'rich':
                     //     if (!!t.attrs.url) {
