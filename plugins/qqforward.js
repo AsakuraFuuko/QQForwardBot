@@ -107,7 +107,7 @@ class QQForward extends Plugin {
                         return that.tgbot.sendMessage(chat_id, '发送失败~')
                     } else {
                         retry += 1;
-                        await Utils.sleep(1000);
+                        await Utils.sleep(1000 * retry);
                         return sendPhoto(options)
                     }
                 })
