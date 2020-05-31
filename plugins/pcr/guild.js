@@ -422,7 +422,7 @@ class PCRGuild extends Plugin {
                 that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 强制申请成功`);
                 reply.push('申请成功，请出刀');
                 reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
-                let tree = tree_list.find(t => t.id === user_name);
+                let tree = tree_list.find(t => t.id === user_id);
                 if (tree) {
                     tree_list = Utils.removeArrayItem(tree_list, tree);
                 }
