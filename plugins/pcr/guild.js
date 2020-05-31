@@ -191,7 +191,7 @@ class PCRGuild extends Plugin {
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])预约(?: )?(?<boss_id>\d+)?/, guild_boss_booking);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])申请(?:出刀)?/, guild_boss_request);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])取消(?:出刀)?/, guild_boss_cancel_request);
-        this.tgbot.onText(/(?:BOSS|boss|^[!|！])强制出刀/, guild_force_boss_request);
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])强制(?:出刀)?/, guild_force_boss_request);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>[wW万])?/, guild_boss_damage);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])挂树/, guild_boss_up_the_tree);
 
