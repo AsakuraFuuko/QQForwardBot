@@ -330,7 +330,7 @@ class PCRGuild extends Plugin {
                     if (tree) {
                         tree_list = Utils.removeArrayItem(tree_list, tree);
                     }
-                    if (!current_boss.attacker_list.includes(a => a.id === user_id)) {
+                    if (!current_boss.attacker_list.find(a => a.id === user_id)) {
                         current_boss.attacker_list.push({id: user_id, name: user_name, time: Utils.getUnixTimestamp()});
                     } else {
                         let attacker = current_boss.attacker_list.find(a => a.id === user_id);
@@ -421,16 +421,26 @@ class PCRGuild extends Plugin {
                 let tree_list = current_boss.tree_list;
                 that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 强制申请成功`);
                 reply.push('强制申请成功，请出刀 (注意请勿撞刀，后果严重');
+                reply.push('当前出刀中的玩家: \n' + attacker_list.map(a => {
+                    let t = (Utils.getUnixTimestamp() - a.time) / 60;
+                    return a.name + '(' + (t > 5 ? '未报' : (Math.round(t) + '分钟前')) + ')'
+                }).join(', '));
                 reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
                 let tree = tree_list.find(t => t.id === user_id);
                 if (tree) {
                     tree_list = Utils.removeArrayItem(tree_list, tree);
                 }
-                if (!attacker_list.includes(a => a.id === user_id)) {
+                if (!attacker_list.find(a => a.id === user_id)) {
                     attacker_list.push({id: user_id, name: user_name, time: Utils.getUnixTimestamp()});
                 } else {
+                    reply = [];
+                    reply.push('已强制申请，请出刀 (注意请勿撞刀，后果严重')
                     let attacker = attacker_list.find(a => a.id === user_id);
                     attacker.time = Utils.getUnixTimestamp()
+                    reply.push('当前出刀中的玩家: \n' + attacker_list.map(a => {
+                        let t = (Utils.getUnixTimestamp() - a.time) / 60;
+                        return a.name + '(' + (t > 5 ? '未报' : (Math.round(t) + '分钟前')) + ')'
+                    }).join(', '));
                 }
                 current_boss.tree_list = tree_list;
                 that.setGuildCurrentBoss(guild_id, current_boss);
