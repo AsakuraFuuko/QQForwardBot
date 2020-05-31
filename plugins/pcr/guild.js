@@ -62,7 +62,7 @@ class PCRGuild extends Plugin {
 
                 Plugin.onText(/(?:BOSS|boss|^[!|！])强制(?:出刀)?/, message, guild_force_boss_request);
 
-                Plugin.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>[wW万])?/, message, guild_boss_damage);
+                Plugin.onText(/(?:BOSS|boss|^[!|！])(?<opt>报刀|强报)(?: )?(?<hp>\d+)(?<unit>[wW万])?/, message, guild_boss_damage);
 
                 Plugin.onText(/(?:BOSS|boss|^[!|！])挂树/, message, guild_boss_up_the_tree);
 
@@ -192,7 +192,7 @@ class PCRGuild extends Plugin {
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])申请(?:出刀)?/, guild_boss_request);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])取消(?:出刀)?/, guild_boss_cancel_request);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])强制(?:出刀)?/, guild_force_boss_request);
-        this.tgbot.onText(/(?:BOSS|boss|^[!|！])报刀(?: )?(?<hp>\d+)(?<unit>[wW万])?/, guild_boss_damage);
+        this.tgbot.onText(/(?:BOSS|boss|^[!|！])(?<opt>报刀|强报)(?: )?(?<hp>\d+)(?<unit>[wW万])?/, guild_boss_damage);
         this.tgbot.onText(/(?:BOSS|boss|^[!|！])挂树/, guild_boss_up_the_tree);
 
         async function guild_boss_status(msg, match) {
@@ -470,7 +470,8 @@ class PCRGuild extends Plugin {
                 let attacker_list = current_boss.attacker_list;
                 let tree_list = current_boss.tree_list;
                 let attacker = attacker_list.find(a => a.id === user_id);
-                if (!attacker) {
+                let opt = match.groups.opt;
+                if (opt !== '强报' && !attacker) {
                     if (is_tg) {
                         return linked_id ? that.tgbot.sendMessage(linked_id, at_tg + ' ' + '请先申请出刀', {parse_mode: 'HTML'}) : null;
                     } else {
