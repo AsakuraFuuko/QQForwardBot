@@ -420,7 +420,7 @@ class PCRGuild extends Plugin {
                 let attacker_list = current_boss.attacker_list;
                 let tree_list = current_boss.tree_list;
                 that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 强制申请成功`);
-                reply.push('申请成功，请出刀');
+                reply.push('强制申请成功，请出刀 (注意请勿撞刀，后果严重');
                 reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
                 let tree = tree_list.find(t => t.id === user_id);
                 if (tree) {
