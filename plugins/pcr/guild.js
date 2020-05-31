@@ -2,7 +2,7 @@ const debug = require('debug')('plugin_pcr_guild');
 const fs = require('fs');
 const Path = require('path');
 const touch = require("touch");
-const moment = require('moment');
+const moment = require('moment-timezone');
 const Mirai = require('node-mirai-sdk');
 const {Plain, At} = Mirai.MessageComponent;
 const Plugin = require('../plugin');
@@ -676,8 +676,8 @@ class PCRGuild extends Plugin {
 
     log(msg) {
         let now = new Date();
-        let dateString = moment(now).format('YYYY-MM-DD');
-        let timeString = moment(now).format('YYYY-MM-DD HH:mm:ss');
+        let dateString = moment.tz(now, "Asia/Shanghai").add(-5, 'hours').format('YYYY-MM-DD');
+        let timeString = moment.tz(now, "Asia/Shanghai").format('YYYY-MM-DD HH:mm:ss');
         fs.appendFileSync('./logs/pcr/' + dateString + '.txt', timeString + ' - ' + msg + '\n')
     }
 }
