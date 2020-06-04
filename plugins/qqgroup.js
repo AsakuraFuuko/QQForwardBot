@@ -15,7 +15,7 @@ class QQGroup extends Plugin {
             let type = message.type;
             let group_id = message.sender.group.id, permission = message.sender.permission;
             if (type === 'GroupMessage' && (permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
-                Plugin.onText(/设置欢迎消息\n(?<welcome>.*)/, message, async (msg, match) => {
+                Plugin.onText(/设置欢迎消息[\n ]?(?<welcome>.*)/, message, async (msg, match) => {
                     let welcome = match.groups.welcome;
                     if (!welcome) {
                         return this.qqbot.sendGroupMessage([Plain('消息为空')], group_id).then((message) => debug(message))
