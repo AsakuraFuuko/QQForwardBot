@@ -6,6 +6,7 @@ const Mirai = require('node-mirai-sdk');
 const Config = require('./lib/config');
 
 const PluginQQForward = require('./plugins/qqforward');
+const PluginQQGroup = require('./plugins/qqgroup');
 // const PluginMusic = require('./plugins/music');
 // const PluginKanColleTime = require('./plugins/kancolletime');
 // const PluginOther = require('./plugins/other');
@@ -89,6 +90,7 @@ new PluginPCRGacha({tgbot, Config, qqbot, botname});
 new PluginPCRGuild({tgbot, Config, qqbot, botname});
 new PluginPCRTools({tgbot, Config, qqbot, botname});
 
+new PluginQQGroup({tgbot, Config, qqbot, botname});
 new PluginQQForward({tgbot, Config, qqbot, botname});
 qqbot.listen('all');
 

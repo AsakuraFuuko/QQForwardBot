@@ -154,7 +154,7 @@ class QQForward extends Plugin {
                     } else {
                         file = is_sticker ? msg.sticker : msg.photo.pop();
                     }
-                    return this.stickerAndPhotoHandle(name, chat_id, caption, file, is_sticker, is_private, is_giforvideo)
+                    return this.stickerAndPhotoHandle(name, chat_id, caption, file, is_sticker, is_private, is_giforvideo, this.getUserShowNickName(group_id, user_id))
                 }
 
                 if (text !== '' && chat_id) {
@@ -270,7 +270,7 @@ class QQForward extends Plugin {
         })
     }
 
-    stickerAndPhotoHandle(name, chat_id, text, image_file, is_sticker, is_private, is_giforvideo) {
+    stickerAndPhotoHandle(name, chat_id, text, image_file, is_sticker, is_private, is_giforvideo, is_show_nickname) {
         if (chat_id && image_file) {
             let file_id = image_file.file_id;
             let file_path = '';
@@ -311,11 +311,16 @@ class QQForward extends Plugin {
             }).then((obj) => {
                 debug(obj);
                 // obj.imageId = obj.imageId.replace('.mirai', is_giforvideo ? '.gif' : '.png');
-                let obj1 = [Image(obj), Plain('\n'), Plain(name), Plain('\n'), Plain(text)];
-                if (is_private) {
-                    return this.qqbot.sendFriendMessage(obj1, chat_id)
+                let reply = [];
+                if (!!text) {
+                    reply = [Image(obj), Plain('\n'), Plain(name), Plain('\n'), Plain(text)];
                 } else {
-                    return this.qqbot.sendGroupMessage(obj1, chat_id)
+                    reply = is_show_nickname ? [Image(obj), Plain('\n'), Plain(name)] : [Image(obj)]
+                }
+                if (is_private) {
+                    return this.qqbot.sendFriendMessage(reply, chat_id)
+                } else {
+                    return this.qqbot.sendGroupMessage(reply, chat_id)
                 }
             }).catch((err) => {
                 console.error(err);
