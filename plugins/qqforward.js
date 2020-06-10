@@ -139,7 +139,7 @@ class QQForward extends Plugin {
                         is_private = true;
                     }
                 }
-                if (!is_private && this.getUserMute(group_id, user_id)) return; //Mute
+                if (msg_type !== 'private' && !is_private && this.getUserMute(group_id, user_id)) return; //Mute
                 if (msg.sticker || msg.photo || msg.document) {
                     let caption = msg.caption || '';//(msg.reply_to_message && msg.reply_to_message.caption) || '';
                     let is_sticker = !!msg.sticker, is_giforvideo = false;
@@ -154,7 +154,7 @@ class QQForward extends Plugin {
                     } else {
                         file = is_sticker ? msg.sticker : msg.photo.pop();
                     }
-                    return this.stickerAndPhotoHandle(name, chat_id, caption, file, is_sticker, is_private, is_giforvideo, this.getUserShowNickName(group_id, user_id))
+                    return this.stickerAndPhotoHandle(name, chat_id, caption, file, is_sticker, is_private, is_giforvideo, msg_type !== 'private' && this.getUserShowNickName(group_id, user_id))
                 }
 
                 if (text !== '' && chat_id) {
@@ -172,7 +172,7 @@ class QQForward extends Plugin {
                     if (is_private) {
                         this.qqbot.sendFriendMessage(msg_no_nick, chat_id)
                     } else {
-                        this.qqbot.sendGroupMessage(this.getUserShowNickName(group_id, user_id) ? msg_nick : msg_no_nick, chat_id)
+                        this.qqbot.sendGroupMessage((msg_type !== 'private' && this.getUserShowNickName(group_id, user_id)) ? msg_nick : msg_no_nick, chat_id)
                     }
                 }
             }

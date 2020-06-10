@@ -64,10 +64,11 @@ tgbot.on("polling_error", (err) => console.log(err));
 
 // qqbot start
 const qqbot = new Mirai({
-    host: 'ws://' + Config.qqbot.ws_host + ':' + Config.qqbot.ws_port,
+    host: 'http://' + Config.qqbot.ws_host + ':' + Config.qqbot.ws_port,
     authKey: Config.qqbot.token,
     qq: Config.qqbot.account,
-    enableWebsocket: true
+    interval: 500,
+    enableWebsocket: false
 });
 
 qqbot.onSignal('authed', () => {
