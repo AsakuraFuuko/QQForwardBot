@@ -51,20 +51,24 @@ class QQForward extends Plugin {
                             url: tag.url.replace('https://', 'http://'),
                             encoding: null
                         };
-                        let img = await sendPhoto(options);
-                        if (length > 10) {
-                            photoss.push(photos);
-                            photos = [];
-                            length = 0;
-                        } else {
-                            if (img.type === 'gif') {
-                                photoss.push([img]);
+                        try {
+                            let img = await sendPhoto(options);
+                            if (length > 10) {
+                                photoss.push(photos);
                                 photos = [];
                                 length = 0;
                             } else {
-                                photos.push(img);
-                                length += 1;
+                                if (img.type === 'gif') {
+                                    photoss.push([img]);
+                                    photos = [];
+                                    length = 0;
+                                } else {
+                                    photos.push(img);
+                                    length += 1;
+                                }
                             }
+                        } catch (e) {
+                            console.log(e)
                         }
                     }
                 }
@@ -102,8 +106,8 @@ class QQForward extends Plugin {
                     let type = await fileType.fromBuffer(data);
                     return {data, type: type.ext, filename: Utils.getRandomString() + '.' + type.ext, mime: type.mime}
                 }).catch(async (e) => {
+                    console.error(e);
                     if (retry > 5) {
-                        console.error(e);
                         return that.tgbot.sendMessage(chat_id, '发送失败~')
                     } else {
                         retry += 1;
@@ -352,7 +356,8 @@ class QQForward extends Plugin {
     }
 
     getUserShowNickName(group_id, user_id) {
-        return this.getUserSettingByGroup(group_id, user_id, 'show_nickname')
+        let result = this.getUserSettingByGroup(group_id, user_id, 'show_nickname');
+        return result === null ? true : result;
     }
 
     setUserShowNickName(group_id, user_id, show_nickname) {
