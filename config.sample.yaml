@@ -6,3 +6,7 @@ qqbot:
   ws_host: localhost
   ws_port: 6700
   token: xxxx
+  account: 123123123
+  ws: false
+  delay: 300
+

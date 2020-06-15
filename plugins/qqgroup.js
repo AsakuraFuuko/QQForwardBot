@@ -13,8 +13,9 @@ class QQGroup extends Plugin {
         this.qqbot.onMessage(async (message) => {
             debug(message);
             let type = message.type;
-            let group_id = message.sender.group.id, permission = message.sender.permission;
+            let permission = message.sender.permission;
             if (type === 'GroupMessage' && (permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
+                let group_id = message.sender.group.id;
                 Plugin.onText(/设置欢迎消息[\n ]?(?<welcome>.*)/, message, async (msg, match) => {
                     let welcome = match.groups.welcome;
                     if (!welcome) {

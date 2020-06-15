@@ -67,7 +67,8 @@ const qqbot = new Mirai({
     host: 'http://' + Config.qqbot.ws_host + ':' + Config.qqbot.ws_port,
     authKey: Config.qqbot.token,
     qq: Config.qqbot.account,
-    enableWebsocket: true
+    interval: Config.qqbot.delay,
+    enableWebsocket: Config.qqbot.ws
 });
 
 qqbot.onSignal('authed', () => {
