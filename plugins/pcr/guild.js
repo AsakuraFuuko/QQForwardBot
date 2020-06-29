@@ -4,6 +4,7 @@ const Path = require('path');
 const touch = require("touch");
 const moment = require('moment-timezone');
 const Mirai = require('node-mirai-sdk');
+const express = require('express');
 const {Plain, At} = Mirai.MessageComponent;
 const Plugin = require('../plugin');
 const Utils = require('../../lib/utils');
@@ -23,12 +24,23 @@ class PCRGuild extends Plugin {
         this.opmenu = [
             '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', 'BOSS列表\n', '设置当前BOSS\n',
             '设置当前轮数\n', '更新BOSS 123 x 123 x 123 (x为不更新)\n', '更新当前BOSSHP 血量\n',
-            '重置公会战数据'
+            '重置公会战数据'//, '[今昨]日数据'
         ]
     }
 
     init() {
         let that = this;
+
+        let app = express();
+
+        app.get('/:guild_id/:day', function (req, res) {
+            res.json(that.getDamages(req.params.guild_id, req.params.day))
+        });
+
+        app.listen(6801, function () {
+            console.log('guild listen on 6801');
+        });
+
         this.qqbot.onMessage(async (message) => {
             debug(message);
             let msg_type = message.type, chat_id, group_id, permission = message.sender.permission;
@@ -219,6 +231,25 @@ class PCRGuild extends Plugin {
                     GuildDB.reset(guild_id);
                     return this.qqbot.sendGroupMessage([Plain('重置成功')], chat_id)
                 });
+                /*
+                                Plugin.onText(/^(?<day>[今昨])日数据$/, message, async (msg, match) => {
+                                    debug(match);
+                                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
+                                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
+                                    }
+                                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
+                                    if (!guild_id) {
+                                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
+                                    }
+                                    let start_time, end_time;
+                                    let day = match.groups.day;
+                                    if (day === '今') {
+                                        start_time = moment.tz(now, "Asia/Shanghai").add(-5, 'hours')
+                                    }
+                                    let data = GuildDB.getDamage(guild_id, start_time, end_time);
+
+                                });
+                 */
             }
         });
 
@@ -759,9 +790,16 @@ class PCRGuild extends Plugin {
 
     log(msg) {
         let now = new Date();
-        let dateString = moment.tz(now, "Asia/Shanghai").add(-5, 'hours').format('YYYY-MM-DD');
-        let timeString = moment.tz(now, "Asia/Shanghai").format('YYYY-MM-DD HH:mm:ss');
+        let dateString = moment.tz(now, 'Asia/Shanghai').add(-5, 'hours').format('YYYY-MM-DD');
+        let timeString = moment.tz(now, 'Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss');
         fs.appendFileSync('./logs/pcr/' + dateString + '.txt', timeString + ' - ' + msg + '\n')
+    }
+
+    getDamages(guild_id, day) {
+        let start_time, end_time;
+        start_time = moment.tz(day + ' 05:00:00', 'Asia/Shanghai').unix();
+        end_time = moment.tz(day + ' 04:59:59', 'Asia/Shanghai').add(1, 'days').unix();
+        return GuildDB.getDamage(guild_id, start_time, end_time);
     }
 
 }
