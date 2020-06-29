@@ -7,6 +7,7 @@ const Mirai = require('node-mirai-sdk');
 const {Plain, At} = Mirai.MessageComponent;
 const Plugin = require('../plugin');
 const Utils = require('../../lib/utils');
+const GuildDB = require('../pcr/lib/guilddbhelper');
 
 const configpath = './data/guilds.json';
 
@@ -16,11 +17,13 @@ class PCRGuild extends Plugin {
         touch(configpath);
         this.menu = [
             '可用公会战指令：\n', 'BOSS战况 (缩写: !战况)\n', 'BOSS预约 编号 (缩写: !预约 编号)\n',
-            'BOSS申请出刀 (缩写: !申请)\n', 'BOSS取消出刀 (缩写: !取消)\n', 'BOSS强制出刀 (缩写: !强制)\n', 'BOSS报刀 伤害 (缩写: !报刀 伤害)\n', 'BOSS挂树 (缩写: !挂树)'
+            'BOSS申请出刀 (缩写: !申请)\n', 'BOSS取消出刀 (缩写: !取消)\n', 'BOSS强制出刀 (缩写: !强制)\n',
+            'BOSS报刀 伤害 (缩写: !报刀 伤害)\n', 'BOSS挂树 (缩写: !挂树)'
         ];
         this.opmenu = [
             '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', 'BOSS列表\n', '设置当前BOSS\n',
-            '更新BOSS 123 x 123 x 123 (x为不更新)\n', '更新当前BOSSHP 血量'
+            '设置当前轮数\n', '更新BOSS 123 x 123 x 123 (x为不更新)\n', '更新当前BOSSHP 血量\n',
+            '重置公会战数据'
         ]
     }
 
@@ -141,6 +144,23 @@ class PCRGuild extends Plugin {
                     }
                 });
 
+                Plugin.onText(/^设置当前轮数(?: )?(?<round>\d+)?/, message, async (msg, match) => {
+                    debug(match);
+                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
+                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
+                    }
+                    let round = parseInt(match.groups.round);
+                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
+                    if (!guild_id) {
+                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
+                    }
+                    if (!round) {
+                        return this.qqbot.sendGroupMessage([Plain('需要第几轮')], chat_id)
+                    }
+                    this.setGuildSetting(guild_id, 'round', round);
+                    return this.qqbot.sendGroupMessage([Plain('第 ' + round + ' 轮设置完毕')], chat_id)
+                });
+
                 Plugin.onText(/^更新当前(?:BOSS|boss)(?: )?(?:HP|hp)(?: )?(?<boss_hp>\d+)?/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
@@ -184,6 +204,21 @@ class PCRGuild extends Plugin {
                     boss.splice(0, 0, '更新完成, 如需要请设置当前boss');
                     return this.qqbot.sendGroupMessage([Plain(boss.join('\n'))], chat_id)
                 });
+
+                Plugin.onText(/^重置公会战数据$/, message, async (msg, match) => {
+                    debug(match);
+                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
+                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
+                    }
+                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
+                    if (!guild_id) {
+                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
+                    }
+                    this.setGuildSetting(guild_id, 'round', 1);
+                    this.setGuildCurrentBossById(guild_id, 1);
+                    GuildDB.reset(guild_id);
+                    return this.qqbot.sendGroupMessage([Plain('重置成功')], chat_id)
+                });
             }
         });
 
@@ -222,8 +257,9 @@ class PCRGuild extends Plugin {
             if (!current_boss) {
                 current_boss = that.setGuildCurrentBossById(guild_id, 1);
             }
+            let round = that.getGuildSetting(guild_id, 'round');
             let reply = [];
-            reply.push('进度：BOSS (' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
+            reply.push('进度：第' + round + '轮BOSS (' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
             reply.push('当前出刀者:\n' + (current_boss.attacker_list.length > 0 ? current_boss.attacker_list.map(a => {
                 let t = (Utils.getUnixTimestamp() - a.time) / 60;
                 return a.name + '(' + (t > 5 ? '未报' : (Math.round(t) + '分钟前')) + ')'
@@ -270,9 +306,10 @@ class PCRGuild extends Plugin {
                 }
             }
             let boss = that.getGuildSetting(guild_id, 'boss');
+            let round = that.getGuildSetting(guild_id, 'round');
             if (boss[parseInt(boss_id) - 1]) {
                 let result = that.updateBookingList(guild_id, user_id, user_name, parseInt(boss_id), is_tg);
-                that.log(`预约 - ${user_name} - ${user_id} - BOSS:${boss_id} ${(result ? '预约完毕' : '取消预约')}`);
+                that.log(`预约 - ${user_name} - ${user_id} - BOSS:${boss_id}/${round} ${(result ? '预约完毕' : '取消预约')}`);
                 if (linked_id) {
                     that.tgbot.sendMessage(linked_id, at_tg + ' ' + 'BOSS(' + boss_id + ')' + (result ? '预约完毕' : '取消预约'), {parse_mode: 'HTML'}).catch(console.error)
                 }
@@ -309,6 +346,7 @@ class PCRGuild extends Plugin {
                 }
             }
             let current_boss = that.getGuildCurrentBoss(guild_id);
+            let round = that.getGuildSetting(guild_id, 'round');
             if (current_boss) {
                 let reply = [];
                 let attacker_list = current_boss.attacker_list.filter((a) => Utils.getUnixTimestamp() - a.time <= 5 * 60);
@@ -323,9 +361,9 @@ class PCRGuild extends Plugin {
                         }).join(', '))
                     }
                 } else {
-                    that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 申请成功`);
+                    that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id}/${round} 申请成功`);
                     reply.push('申请成功，请出刀');
-                    reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
+                    reply.push('第' + round + '轮BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
                     let tree = tree_list.find(t => t.id === user_id);
                     if (tree) {
                         tree_list = Utils.removeArrayItem(tree_list, tree);
@@ -415,17 +453,18 @@ class PCRGuild extends Plugin {
                 }
             }
             let current_boss = that.getGuildCurrentBoss(guild_id);
+            let round = that.getGuildSetting(guild_id, 'round');
             if (current_boss) {
                 let reply = [];
                 let attacker_list = current_boss.attacker_list;
                 let tree_list = current_boss.tree_list;
-                that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 强制申请成功`);
+                that.log(`申请 - ${user_name} - ${user_id} - BOSS:${current_boss.id}/${round} 强制申请成功`);
                 reply.push('强制申请成功，请出刀 (注意请勿撞刀，后果严重');
                 reply.push('当前出刀中的玩家: \n' + attacker_list.map(a => {
                     let t = (Utils.getUnixTimestamp() - a.time) / 60;
                     return a.name + '(' + (t > 5 ? '未报' : (Math.round(t) + '分钟前')) + ')'
                 }).join(', '));
-                reply.push('BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
+                reply.push('第' + round + '轮BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp);
                 let tree = tree_list.find(t => t.id === user_id);
                 if (tree) {
                     tree_list = Utils.removeArrayItem(tree_list, tree);
@@ -475,6 +514,7 @@ class PCRGuild extends Plugin {
                 }
             }
             let current_boss = that.getGuildCurrentBoss(guild_id);
+            let round = that.getGuildSetting(guild_id, 'round');
             if (current_boss) {
                 let reply = [];
                 let attacker_list = current_boss.attacker_list;
@@ -503,30 +543,35 @@ class PCRGuild extends Plugin {
                     }
                     current_boss.hp = current_boss.hp - hp;
                     that.log(`出刀 - ${user_name} - ${user_id} - BOSS:${current_boss.id} dmg:${hp} (${current_boss.hp}/${current_boss.max_hp})`);
+                    GuildDB.addBossDamage(guild_id, user_name, user_id, current_boss.id, round, hp, current_boss.hp, current_boss.max_hp);
                     if (current_boss.hp > 0) {
                         current_boss.attacker_list = attacker_list;
                         that.setGuildCurrentBoss(guild_id, current_boss);
                         if (linked_id) {
-                            that.tgbot.sendMessage(linked_id, at_tg + ' 进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp, {parse_mode: 'HTML'}).catch(console.error)
+                            that.tgbot.sendMessage(linked_id, at_tg + ' 进度：第' + round + '轮BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp, {parse_mode: 'HTML'}).catch(console.error)
                         }
-                        return that.qqbot.sendGroupMessage([at_qq, Plain('进度：BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp)], group_id)
+                        return that.qqbot.sendGroupMessage([at_qq, Plain('进度：第' + round + '轮BOSS(' + current_boss.id + ') HP: ' + current_boss.hp + '/' + current_boss.max_hp)], group_id)
                     } else {
                         // 打屎了
-                        that.log(`出刀 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 已死`);
-                        let next_id = current_boss.id + 1;//, round = parseInt(next_id / 5) + 1;
-                        next_id >= 6 ? next_id = 1 : next_id;
+                        that.log(`出刀 - ${user_name} - ${user_id} - BOSS:${current_boss.id}/${round} 已死`);
+                        let next_id = current_boss.id + 1;
+                        if (next_id >= 6) {
+                            next_id = 1;
+                            round += 1;
+                            that.setGuildSetting(guild_id, 'round', round)
+                        }
                         let booking_list = that.getGuildSetting(guild_id, 'booking_list');
                         reply.push(Plain('当前BOSS已死，可下树玩家：\n'));
                         tree_list.map(t => {
-                            that.log(`下树 - ${user_name} - ${user_id} - BOSS:${current_boss.id}`);
+                            that.log(`下树 - ${user_name} - ${user_id} - BOSS:${current_boss.id}/${round}`);
                             reply.push(t)
                         });
                         current_boss = that.setGuildCurrentBossById(guild_id, next_id);
-                        reply.push(Plain('\nBOSS(' + current_boss.id + ') MaxHP: ' + current_boss.max_hp + ' 已开启，预订提醒：\n'));
+                        reply.push(Plain('\n第' + round + '轮BOSS(' + current_boss.id + ') MaxHP: ' + current_boss.max_hp + ' 已开启，预订提醒：\n'));
                         for (let book of booking_list) {
                             if (book.boss_id === next_id) {
                                 reply.push(book);
-                                that.log(`预约 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 提醒`);
+                                that.log(`预约 - ${user_name} - ${user_id} - BOSS:${current_boss.id}/${round} 提醒`);
                                 let index = booking_list.indexOf(book);
                                 delete booking_list[index];
                             }
@@ -570,6 +615,7 @@ class PCRGuild extends Plugin {
                 }
             }
             let current_boss = that.getGuildCurrentBoss(guild_id);
+            let round = that.getGuildSetting(guild_id, 'round');
             if (current_boss) {
                 let reply = [];
                 let attacker_list = current_boss.attacker_list;
@@ -590,7 +636,7 @@ class PCRGuild extends Plugin {
                             return that.qqbot.sendGroupMessage([at_qq, Plain('未申请出刀')], group_id)
                         }
                     }
-                    that.log(`挂树 - ${user_name} - ${user_id} - BOSS:${current_boss.id} 挂树成功`);
+                    that.log(`挂树 - ${user_name} - ${user_id} - BOSS:${current_boss.id}/${round} 挂树成功`);
                     tree_list.push({id: user_id, name: user_name, is_tg, time: Utils.getUnixTimestamp()});
                     reply.push('申请挂树成功')
                 }
@@ -623,6 +669,8 @@ class PCRGuild extends Plugin {
         let default_boss = [8000000, 12000000, 20000000, 40000000, 80000000];
         this.setGuildSetting(guild_id, 'guild_name', guild_name);
         this.setGuildSetting(guild_id, 'boss', default_boss);
+        this.setGuildSetting(guild_id, 'round', 1);
+        this.setGuildCurrentBossById(guild_id, 1);
         return {guild_id, guild_name}
     }
 
@@ -715,6 +763,7 @@ class PCRGuild extends Plugin {
         let timeString = moment.tz(now, "Asia/Shanghai").format('YYYY-MM-DD HH:mm:ss');
         fs.appendFileSync('./logs/pcr/' + dateString + '.txt', timeString + ' - ' + msg + '\n')
     }
+
 }
 
 module.exports = PCRGuild;

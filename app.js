@@ -11,7 +11,7 @@ const PluginQQGroup = require('./plugins/qqgroup');
 // const PluginKanColleTime = require('./plugins/kancolletime');
 // const PluginOther = require('./plugins/other');
 
-const PluginPCRGacha = require('./plugins/pcr/gacha');
+// const PluginPCRGacha = require('./plugins/pcr/gacha');
 const PluginPCRGuild = require('./plugins/pcr/guild');
 const PluginPCRTools = require('./plugins/pcr/tools');
 
@@ -87,7 +87,7 @@ qqbot.onSignal('verified', async () => {
 // new PluginKanColleTime({tgbot, Config, qqbot});
 // new PluginOther({tgbot, Config, qqbot});
 
-new PluginPCRGacha({tgbot, Config, qqbot, botname});
+// new PluginPCRGacha({tgbot, Config, qqbot, botname});
 new PluginPCRGuild({tgbot, Config, qqbot, botname});
 new PluginPCRTools({tgbot, Config, qqbot, botname});
 
