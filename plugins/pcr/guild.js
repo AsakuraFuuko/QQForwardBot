@@ -24,7 +24,7 @@ class PCRGuild extends Plugin {
         this.opmenu = [
             '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', 'BOSS列表\n', '设置当前BOSS\n',
             '设置当前轮数\n', '更新BOSS 123 x 123 x 123 (x为不更新)\n', '更新当前BOSSHP 血量\n',
-            '删刀 ID\n', '改刀 ID 血量\n', '重置公会战数据'//, '[今昨]日数据'
+            '删刀 ID\n', '改刀 ID 血量\n', '重置公会战数据', '今日数据'
         ]
     }
 
@@ -276,7 +276,6 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain('重置成功')], chat_id)
                 });
 
-                /*
                 Plugin.onText(/^(?<day>[今昨])日数据$/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
@@ -286,15 +285,15 @@ class PCRGuild extends Plugin {
                     if (!guild_id) {
                         return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
                     }
-                    let start_time, end_time;
+                    let date;
                     let day = match.groups.day;
                     if (day === '今') {
-                        start_time = moment.tz(now, "Asia/Shanghai").add(-5, 'hours')
+                        date = moment.tz(new Date(), "Asia/Shanghai").format('YYYY-MM-DD');
                     }
-                    let data = GuildDB.getDamage(guild_id, start_time, end_time);
-
+                    let data = this.getDamages(guild_id, date);
+                    let result = data.map((d) => Plain(d.id + ', ' + d.name + ', ' + d.damage));
+                    return this.qqbot.sendGroupMessage(result, chat_id)
                 });
-                */
             }
         });
 
