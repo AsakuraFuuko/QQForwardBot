@@ -24,7 +24,7 @@ class PCRGuild extends Plugin {
         this.opmenu = [
             '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', 'BOSS列表\n', '设置当前BOSS\n',
             '设置当前轮数\n', '更新BOSS 123 x 123 x 123 (x为不更新)\n', '更新当前BOSSHP 血量\n',
-            '重置公会战数据'//, '[今昨]日数据'
+            '删刀 ID\n', '改刀 ID 血量\n', '重置公会战数据'//, '[今昨]日数据'
         ]
     }
 
@@ -217,6 +217,50 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain(boss.join('\n'))], chat_id)
                 });
 
+                Plugin.onText(/^改刀(?: )?(?<id>\d+) (?<hp>\d+)/, message, async (msg, match) => {
+                    debug(match);
+                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
+                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
+                    }
+                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
+                    if (!guild_id) {
+                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
+                    }
+                    let id = match.groups.id;
+                    if (!id) {
+                        return this.qqbot.sendGroupMessage([Plain('需要id')], chat_id)
+                    }
+                    let hp = match.groups.hp;
+                    if (!hp) {
+                        return this.qqbot.sendGroupMessage([Plain('需要HP')], chat_id)
+                    }
+                    if (!GuildDB.checkId(id)) {
+                        return this.qqbot.sendGroupMessage([Plain('此刀不存在')], chat_id)
+                    }
+                    GuildDB.updateDamage(id, hp);
+                    return this.qqbot.sendGroupMessage([Plain('改刀成功')], chat_id)
+                });
+
+                Plugin.onText(/^删刀(?: )?(?<id>\d+)/, message, async (msg, match) => {
+                    debug(match);
+                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
+                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
+                    }
+                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
+                    if (!guild_id) {
+                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
+                    }
+                    let id = match.groups.id;
+                    if (!id) {
+                        return this.qqbot.sendGroupMessage([Plain('需要id')], chat_id)
+                    }
+                    if (!GuildDB.checkId(id)) {
+                        return this.qqbot.sendGroupMessage([Plain('此刀不存在')], chat_id)
+                    }
+                    GuildDB.deleteDamage(id);
+                    return this.qqbot.sendGroupMessage([Plain('删刀成功')], chat_id)
+                });
+
                 Plugin.onText(/^重置公会战数据$/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
@@ -231,25 +275,26 @@ class PCRGuild extends Plugin {
                     GuildDB.reset(guild_id);
                     return this.qqbot.sendGroupMessage([Plain('重置成功')], chat_id)
                 });
-                /*
-                                Plugin.onText(/^(?<day>[今昨])日数据$/, message, async (msg, match) => {
-                                    debug(match);
-                                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
-                                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
-                                    }
-                                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
-                                    if (!guild_id) {
-                                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
-                                    }
-                                    let start_time, end_time;
-                                    let day = match.groups.day;
-                                    if (day === '今') {
-                                        start_time = moment.tz(now, "Asia/Shanghai").add(-5, 'hours')
-                                    }
-                                    let data = GuildDB.getDamage(guild_id, start_time, end_time);
 
-                                });
-                 */
+                /*
+                Plugin.onText(/^(?<day>[今昨])日数据$/, message, async (msg, match) => {
+                    debug(match);
+                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
+                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
+                    }
+                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
+                    if (!guild_id) {
+                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
+                    }
+                    let start_time, end_time;
+                    let day = match.groups.day;
+                    if (day === '今') {
+                        start_time = moment.tz(now, "Asia/Shanghai").add(-5, 'hours')
+                    }
+                    let data = GuildDB.getDamage(guild_id, start_time, end_time);
+
+                });
+                */
             }
         });
 
@@ -799,7 +844,7 @@ class PCRGuild extends Plugin {
         let start_time, end_time;
         start_time = moment.tz(day + ' 05:00:00', 'Asia/Shanghai').unix();
         end_time = moment.tz(day + ' 04:59:59', 'Asia/Shanghai').add(1, 'days').unix();
-        return GuildDB.getDamage(guild_id, start_time, end_time);
+        return GuildDB.getDamages(guild_id, start_time, end_time);
     }
 
 }

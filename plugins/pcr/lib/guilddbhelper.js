@@ -27,8 +27,20 @@ class GuildDBHelper {
         DB().delete('damages', {guild_id})
     }
 
-    getDamage(guild_id, start_time, end_time) {
+    getDamages(guild_id, start_time, end_time) {
         return DB().query('SELECT * FROM damages WHERE guild_id=? AND time>=? AND time<=?', guild_id, start_time, end_time);
+    }
+
+    updateDamage(id, damage) {
+        DB().update('damages', {damage}, {id: parseInt(id)})
+    }
+
+    deleteDamage(id) {
+        DB().delete('damages', {id: parseInt(id)})
+    }
+
+    checkId(id) {
+        return !!DB().queryFirstRow('SELECT * FROM damages WHERE id=?', id);
     }
 }
 
