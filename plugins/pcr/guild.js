@@ -22,9 +22,9 @@ class PCRGuild extends Plugin {
             'BOSS报刀 伤害 (缩写: !报刀 伤害)\n', 'BOSS挂树 (缩写: !挂树)'
         ];
         this.opmenu = [
-            '可用公会战管理指令：\n', '创建公会\n', '绑定公会\n', 'BOSS列表\n', '设置当前BOSS\n',
-            '设置当前轮数\n', '更新BOSS 123 x 123 x 123 (x为不更新)\n', '更新当前BOSSHP 血量\n',
-            '删刀 ID\n', '改刀 ID 血量\n', '重置公会战数据'//, '今日数据'
+            '可用公会战管理指令：\n', '!创建公会\n', '!绑定公会\n', 'BOSS列表\n', '!设置当前BOSS\n',
+            '!设置当前轮数\n', '!更新BOSS 123 x 123 x 123 (x为不更新)\n', '!更新当前BOSSHP 血量\n',
+            '!删刀 ID\n', '!改刀 ID 血量\n', '!重置公会战数据!'//, '今日数据'
         ]
     }
 
@@ -81,7 +81,7 @@ class PCRGuild extends Plugin {
 
                 Plugin.onText(/(?:BOSS|boss|^[!|！])挂树/, message, guild_boss_up_the_tree);
 
-                Plugin.onText(/^创建公会(?: )?(.*)/, message, async (msg, match) => {
+                Plugin.onText(/^[!|！]创建公会(?: )?(.*)/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -96,7 +96,7 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/^绑定公会(?: )?(\d+)?/, message, async (msg, match) => {
+                Plugin.onText(/^[!|！]绑定公会(?: )?(\d+)?/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -134,7 +134,7 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain(boss.join('\n'))], chat_id)
                 });
 
-                Plugin.onText(/^设置当前(?:BOSS|boss)(?: )?(?<boss_id>\d+)?/, message, async (msg, match) => {
+                Plugin.onText(/^[!|！]设置当前(?:BOSS|boss)(?: )?(?<boss_id>\d+)?/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -156,7 +156,7 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/^设置当前轮数(?: )?(?<round>\d+)?/, message, async (msg, match) => {
+                Plugin.onText(/^[!|！]设置当前轮数(?: )?(?<round>\d+)?/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -173,7 +173,7 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain('第 ' + round + ' 轮设置完毕')], chat_id)
                 });
 
-                Plugin.onText(/^更新当前(?:BOSS|boss)(?: )?(?:HP|hp)(?: )?(?<boss_hp>\d+)?/, message, async (msg, match) => {
+                Plugin.onText(/^[!|！]更新当前(?:BOSS|boss)(?: )?(?:HP|hp)(?: )?(?<boss_hp>\d+)?/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -194,7 +194,7 @@ class PCRGuild extends Plugin {
                     }
                 });
 
-                Plugin.onText(/^更新(?:BOSS|boss)(?: )?(?<max_hp>.*)/, message, async (msg, match) => {
+                Plugin.onText(/^[!|！]更新(?:BOSS|boss)(?: )?(?<max_hp>.*)/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -217,7 +217,7 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain(boss.join('\n'))], chat_id)
                 });
 
-                Plugin.onText(/^改刀(?: )?(?<id>\d+) (?<hp>\d+)/, message, async (msg, match) => {
+                Plugin.onText(/^[!|！]改刀(?: )?(?<id>\d+) (?<hp>\d+)/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -241,7 +241,7 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain('改刀成功')], chat_id)
                 });
 
-                Plugin.onText(/^删刀(?: )?(?<id>\d+)/, message, async (msg, match) => {
+                Plugin.onText(/^[!|！]删刀(?: )?(?<id>\d+)/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
@@ -261,7 +261,7 @@ class PCRGuild extends Plugin {
                     return this.qqbot.sendGroupMessage([Plain('删刀成功')], chat_id)
                 });
 
-                Plugin.onText(/^重置公会战数据$/, message, async (msg, match) => {
+                Plugin.onText(/^[!|！]重置公会战数据[!|！]$/, message, async (msg, match) => {
                     debug(match);
                     if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
                         return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
