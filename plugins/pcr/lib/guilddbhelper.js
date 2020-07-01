@@ -28,7 +28,10 @@ class GuildDBHelper {
     }
 
     getDamages(guild_id, start_time, end_time) {
-        return DB().query('SELECT * FROM damages WHERE guild_id=? AND time>=? AND time<=?', guild_id, start_time, end_time);
+        if (start_time)
+            return DB().query('SELECT * FROM damages WHERE guild_id=? AND time>=? AND time<=?', guild_id, start_time, end_time);
+        else
+            return DB().query('SELECT * FROM damages WHERE guild_id=?', guild_id);
     }
 
     updateDamage(id, damage) {

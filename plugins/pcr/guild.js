@@ -33,6 +33,9 @@ class PCRGuild extends Plugin {
 
         let app = express();
 
+        app.get('/:guild_id', function (req, res) {
+            res.json(that.getDamages(req.params.guild_id))
+        });
         app.get('/:guild_id/:day', function (req, res) {
             res.json(that.getDamages(req.params.guild_id, req.params.day))
         });
@@ -839,10 +842,12 @@ class PCRGuild extends Plugin {
         fs.appendFileSync('./logs/pcr/' + dateString + '.txt', timeString + ' - ' + msg + '\n')
     }
 
-    getDamages(guild_id, day) {
+    getDamages(guild_id, day = null) {
         let start_time, end_time;
-        start_time = moment.tz(day + ' 05:00:00', 'Asia/Shanghai').unix();
-        end_time = moment.tz(day + ' 04:59:59', 'Asia/Shanghai').add(1, 'days').unix();
+        if (day) {
+            start_time = moment.tz(day + ' 05:00:00', 'Asia/Shanghai').unix();
+            end_time = moment.tz(day + ' 04:59:59', 'Asia/Shanghai').add(1, 'days').unix();
+        }
         return GuildDB.getDamages(guild_id, start_time, end_time);
     }
 
