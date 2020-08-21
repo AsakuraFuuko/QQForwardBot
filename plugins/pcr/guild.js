@@ -24,7 +24,7 @@ class PCRGuild extends Plugin {
         this.opmenu = [
             '可用公会战管理指令：\n', '!创建公会\n', '!绑定公会\n', 'BOSS列表\n', '!设置当前BOSS\n',
             '!设置当前轮数\n', '!更新BOSS 123 x 123 x 123 (x为不更新)\n', '!更新当前BOSSHP 血量\n',
-            '!删刀 ID\n', '!改刀 ID 血量\n', '!重置公会战数据!'//, '今日数据'
+            '!删刀 ID\n', '!改刀 ID 血量\n', '!重置公会战数据!\n', '关闭申请\n', '开启申请'
         ]
     }
 
@@ -277,6 +277,32 @@ class PCRGuild extends Plugin {
                     this.setGuildCurrentBossById(guild_id, 1);
                     GuildDB.reset(guild_id);
                     return this.qqbot.sendGroupMessage([Plain('重置成功')], chat_id)
+                });
+
+                Plugin.onText(/^[!|！]开启申请$/, message, async (msg, match) => {
+                    debug(match);
+                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
+                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
+                    }
+                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
+                    if (!guild_id) {
+                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
+                    }
+                    this.setGuildSetting(guild_id, 'apply', true);
+                    return this.qqbot.sendGroupMessage([Plain('开启成功')], chat_id)
+                });
+
+                Plugin.onText(/^[!|！]关闭申请$/, message, async (msg, match) => {
+                    debug(match);
+                    if (!(permission === 'ADMINISTRATOR' || permission === 'OWNER')) {
+                        return this.qqbot.sendGroupMessage([Plain('需要管理员')], chat_id)
+                    }
+                    let guild_id = this.getGroupSetting(group_id, 'guild_id');
+                    if (!guild_id) {
+                        return this.qqbot.sendGroupMessage([Plain('请先创建或绑定一个公会')], chat_id)
+                    }
+                    this.setGuildSetting(guild_id, 'apply', false);
+                    return this.qqbot.sendGroupMessage([Plain('关闭成功')], chat_id)
                 });
 
                 /*Plugin.onText(/^(?<day>[今昨])日数据$/, message, async (msg, match) => {
@@ -599,7 +625,8 @@ class PCRGuild extends Plugin {
                 let tree_list = current_boss.tree_list;
                 let attacker = attacker_list.find(a => a.id === user_id);
                 let opt = match.groups.opt;
-                if (opt !== '强报' && !attacker) {
+                let must_apply = that.getGuildSetting(guild_id, 'apply');
+                if (!!must_apply && !attacker) {
                     if (is_tg) {
                         return linked_id ? that.tgbot.sendMessage(linked_id, at_tg + ' ' + '请先申请出刀', {parse_mode: 'HTML'}) : null;
                     } else {
